@@ -38,47 +38,39 @@ async function mostrarAlojamientos(tipo, servicio){
     }
 }
 
-function getAlojamientos(){
-    return fetch("http://localhost:8080/alojamiento/getAll")
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error en la respuesta de la API para obtener los alojamientos');
-            } else {
-                return response.json();
-            }
-        });
+async function getAlojamientos(){
+    const response = await fetch("http://localhost:8080/alojamiento/getAll");
+    if (!response.ok) {
+        throw new Error('Error en la respuesta de la API para obtener los alojamientos');
+    } else {
+        return response.json();
+    }
 }
 
-function getMainImage(alojamientoId){
-    return fetch("http://localhost:8080/alojamiento/imagenes/mainImagen/" + alojamientoId)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error en la respuesta de la API para obtener la imagen principal del alojamiento');
-            } else {
-                return response.text();
-            }
-        });
+async function getMainImage(alojamientoId){
+    const response = await fetch("http://localhost:8080/alojamiento/imagenes/mainImagen/" + alojamientoId);
+    if (!response.ok) {
+        throw new Error('Error en la respuesta de la API para obtener la imagen principal del alojamiento');
+    } else {
+        return response.text();
+    }
 }
 
-function getValoracionMedia(alojamientoId) {
-    return fetch("http://localhost:8080/alojamiento/valoraciones/media/" + alojamientoId)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error en la respuesta de la API para obtener la valoración media del alojamiento');
-            } else {
-                return response.json();
-            }
-        });
+async function getValoracionMedia(alojamientoId) {
+    const response = await fetch("http://localhost:8080/alojamiento/valoraciones/media/" + alojamientoId);
+    if (!response.ok) {
+        throw new Error('Error en la respuesta de la API para obtener la valoración media del alojamiento');
+    } else {
+        return response.json();
+    }
         
 }
 
-function getServiciosByAlojamientoId(alojamientoId) {
-    return fetch("http://localhost:8080/servicios?alojamientoId=" + alojamientoId)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error en la respuesta de la API para obtener los servicios del alojamiento');
-            } else {
-                return response.json();
-            }
-        });
+async function getServiciosByAlojamientoId(alojamientoId) {
+    const response = await fetch("http://localhost:8080/servicios?alojamientoId=" + alojamientoId);
+    if (!response.ok) {
+        throw new Error('Error en la respuesta de la API para obtener los servicios del alojamiento');
+    } else {
+        return response.json();
+    }
 }

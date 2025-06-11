@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-AirbnbApplication<airbnb>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.airbnb.airbnb.AirbnbApplication",
+            "projectName": "airbnb",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

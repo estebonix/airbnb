@@ -32,7 +32,6 @@ public class ValoracionesAlojamientoService {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                Integer id_valoracion = rs.getInt("id");
                 String codigo = rs.getString("codigo");
                 String descripcion = rs.getString("descripcion");
                 Integer puntuacion = rs.getInt("puntuacion");
@@ -81,5 +80,4 @@ public class ValoracionesAlojamientoService {
             return ResponseEntity.status(500).build();
         }
     }
-
 }

@@ -24,12 +24,12 @@ public class ServicioServices {
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                    Long servicioId = rs.getLong("id");
-                    String codigo = rs.getString("codigo");
-                    String descripcion = rs.getString("descripcion");
-                    String icono = rs.getString("icono");
-                    return new ServicioDTO(servicioId, codigo, descripcion, icono);
-                }
+                Long servicioId = rs.getLong("id");
+                String codigo = rs.getString("codigo");
+                String descripcion = rs.getString("descripcion");
+                String icono = rs.getString("icono");
+                return new ServicioDTO(servicioId, codigo, descripcion, icono);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

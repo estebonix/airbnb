@@ -52,7 +52,6 @@ public class AlojamientoController {
     // Actualizar alojamiento
     @PutMapping("/update/{id}")
     public ResponseEntity<String> updateAlojamiento(@PathVariable Long id, @RequestBody AlojamientoDTO alojamientoDTO) {
-         
         String result = alojamientoServices.updateAlojamiento(id, alojamientoDTO);
         return ResponseEntity.ok(result);
     }
@@ -60,7 +59,6 @@ public class AlojamientoController {
     // Borrar alojamiento
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteAlojamiento(@PathVariable Long id) {
-        
         String result = alojamientoServices.deleteAlojamiento(id);
         return ResponseEntity.ok(result);
     }

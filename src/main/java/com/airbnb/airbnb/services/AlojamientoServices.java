@@ -58,7 +58,6 @@ public class AlojamientoServices {
     }
 
     
-
     // Obtener un alojamiento por su id
     public AlojamientoDTO getAlojamientoById(Long id) {
         try (Connection conn = DriverManager.getConnection(databaseUrl, "usuario", "usuario")) {
@@ -124,10 +123,33 @@ public class AlojamientoServices {
     }
 
     public String updateAlojamiento(Long id, AlojamientoDTO alojamientoDTO) {
-        // Implementa la lógica para actualizar un alojamiento
-        // Similar a addAlojamiento pero con UPDATE SQL
-        // TODO: POR HACER
-        return "Método updateAlojamiento no implementado";
+        try (Connection conn = DriverManager.getConnection(databaseUrl, "usuario", "usuario")) {
+            PreparedStatement ps = conn.prepareStatement("UPDATE alojamientos SET titulo = ?, descripcion = ?, tipo_alojamiento = ?, capacidad = ?, habitaciones = ?, camas = ?, banos = ?, precio_noche = ?, direccion = ?, direccion_descripcion = ?, ciudad = ?, pais = ?, codigo_postal = ? WHERE id = ?");
+            ps.setString(1, alojamientoDTO.getTitulo());
+            ps.setString(2, alojamientoDTO.getDescripcion());
+            ps.setString(3, alojamientoDTO.getTipoAlojamiento());
+            ps.setInt(4, alojamientoDTO.getCapacidad());
+            ps.setInt(5, alojamientoDTO.getHabitaciones());
+            ps.setInt(6, alojamientoDTO.getCamas());
+            ps.setInt(7, alojamientoDTO.getBanos());
+            ps.setDouble(8, alojamientoDTO.getPrecioNoche());
+            ps.setString(9, alojamientoDTO.getDireccion());
+            ps.setString(10, alojamientoDTO.getDireccionDescripcion());
+            ps.setString(11, alojamientoDTO.getCiudad());
+            ps.setString(12, alojamientoDTO.getPais());
+            ps.setString(13, alojamientoDTO.getCodigoPostal());
+            ps.setLong(14, id);
+            
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                return "Alojamiento actualizado correctamente";
+            } else {
+                return "No se encontró el alojamiento con el ID proporcionado";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error al actualizar el alojamiento";
+        }
     }
 
     public String deleteAlojamiento(Long id) {
