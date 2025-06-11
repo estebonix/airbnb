@@ -1,11 +1,11 @@
-async function mostrarAlojamientos(tipo, servicio){
+async function mostrarAlojamientos(tipo, servicio) {
     const listings = document.getElementById('listings');
     let alojamientos = await getAlojamientos();
-    
+
     listings.innerHTML = "";
     if (alojamientos.length > 0) {
         for (const alojamiento of alojamientos) {
-            if (alojamiento.tipoAlojamiento === tipo || tipo === 'todos'){
+            if (alojamiento.tipoAlojamiento === tipo || tipo === 'todos') {
                 let servicios = await getServiciosByAlojamientoId(alojamiento.id);
                 if (servicio === 'none' || servicios.includes(servicio)) {
                     let mainImageUrl = await getMainImage(alojamiento.id);
@@ -38,7 +38,7 @@ async function mostrarAlojamientos(tipo, servicio){
     }
 }
 
-async function getAlojamientos(){
+async function getAlojamientos() {
     const response = await fetch("http://localhost:8080/alojamiento/getAll");
     if (!response.ok) {
         throw new Error('Error en la respuesta de la API para obtener los alojamientos');
@@ -47,13 +47,13 @@ async function getAlojamientos(){
     }
 }
 
-async function getMainImage(alojamientoId){
+async function getMainImage(alojamientoId) {
     const response = await fetch("http://localhost:8080/alojamiento/imagenes/mainImagen/" + alojamientoId);
     if (!response.ok) {
         throw new Error('Error en la respuesta de la API para obtener la imagen principal del alojamiento');
     } else {
         return response.text();
-    }
+    } // TODO: MAYBE NO FUNCIONA PORQUE EL CONTROLLER DEVUELVE UN RESPONSEENTITY Y NO UN STRING
 }
 
 async function getValoracionMedia(alojamientoId) {
@@ -63,7 +63,7 @@ async function getValoracionMedia(alojamientoId) {
     } else {
         return response.json();
     }
-        
+
 }
 
 async function getServiciosByAlojamientoId(alojamientoId) {

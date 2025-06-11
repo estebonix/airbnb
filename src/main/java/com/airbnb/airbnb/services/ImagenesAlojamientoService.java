@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.airbnb.airbnb.dto.AlojamientoDTO;
@@ -15,22 +16,24 @@ import com.airbnb.airbnb.dto.ImagenDTO;
 
 @Service
 public class ImagenesAlojamientoService {
+
     @Value("${database.sql.connection}")
     private String databaseUrl;
     private Connection conn;
 
-    public String getMainImagen(Integer id) {
-        try(Connection conn = DriverManager.getConnection(databaseUrl, "usuario", "usuario")) {
+    public ResponseEntity<String> getMainImagen(Integer id) {
+        try (Connection conn = DriverManager.getConnection(databaseUrl, "usuario", "usuario")) {
             PreparedStatement ps = conn.prepareStatement("SELECT url_imagen FROM imagenes_alojamiento WHERE alojamiento_id = ? AND es_principal = 1");
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getString("url_imagen");
+                String url_imagen = rs.getString("url_imagen");
+                return ResponseEntity.ok(url_imagen);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "";
+        return ResponseEntity.notFound().build();
     }
 
     public List<ImagenDTO> getImagenesByAlojamientoId(Long id) {
