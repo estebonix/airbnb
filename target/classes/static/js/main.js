@@ -5,9 +5,9 @@ async function mostrarAlojamientos(tipo, servicio) {
     listings.innerHTML = "";
     if (alojamientos.length > 0) {
         for (const alojamiento of alojamientos) {
-            if (alojamiento.tipoAlojamiento === tipo || tipo === 'todos') {
+            if (tipo.includes(alojamiento.tipoAlojamiento) || tipo.includes('todos')) {
                 let servicios = await getServiciosByAlojamientoId(alojamiento.id);
-                if (servicio === 'none' || servicios.includes(servicio)) {
+                if (servicio.includes('none') || servicios.includes(servicio)) {
                     let mainImageUrl = await getMainImage(alojamiento.id);
                     let valoracionMedia = await getValoracionMedia(alojamiento.id);
                     listings.innerHTML += `

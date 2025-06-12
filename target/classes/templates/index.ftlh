@@ -46,7 +46,7 @@
     <!-- Filters -->
     <div class="filters">
         <div class="filter-categories">
-            <div class="category active">
+            <div id="categoriaTodos" class="category active">
                 <div class="category-icon">
                     <i class="fas fa-th"></i>
                 </div>
@@ -273,66 +273,126 @@
             });
         });
         
+        let tipo = [];
+        let servicio = [];
         // Funcionalidad de categorías
         document.querySelectorAll('.category').forEach(category => {
             category.addEventListener('click', function() {
-                document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                const nombreCategoria = this.querySelector('.category-name').textContent.trim();
-                let tipo = "";
-                let servicio = "";
-                switch (nombreCategoria) {
+                this.classList.toggle('active');
+                if(this.classList.contains('active')){
+                    const nombreCategoria = this.querySelector('.category-name').textContent.trim();
+                    const categoriaTodos = document.querySelector('#categoriaTodos');
+                    if (nombreCategoria !== 'Todos') {
+                        categoriaTodos.classList.remove('active');
+                        if(tipo.includes('todos')) {
+                            tipo = [];
+                        }
+                        if(servicio.includes('none')) {
+                            servicio = [];
+                        }
+                    }   
+                    switch (nombreCategoria) {
                     case 'Todos':
-                        tipo = 'todos';
+                        document.querySelectorAll('.category').forEach(c => { c.classList.remove('active') });
+                        this.classList.add('active');
+                        tipo = [];
+                        servicio = [];
+                        servicio.push('none');
+                        tipo.push('todos');
                         break;
                     case 'Casas':
-                        tipo = 'Casa';
+                        tipo.push('Casa');
                         break;
                     case 'Estudio':
-                        tipo = 'Estudio';
+                        tipo.push('Estudio');
                         break;
                     case 'Apartamentos':
-                        tipo = 'Apartamento';
+                        tipo.push('Apartamento');
                         break;
                     case 'Conectados':
-                        servicio = 'WiFi';
+                        servicio.push('WiFi');
                         break;
                     case 'Cocina equipada':
-                        servicio = 'Cocina';
+                        servicio.push('Cocina');
                         break;
                     case 'Estacionamiento gratuito':
-                        servicio = 'Estacionamiento gratuito';
+                        servicio.push('Estacionamiento gratuito');
                         break;
                     case 'Piscinas':
-                        servicio = 'Piscina';
+                        servicio.push('Piscina');
                         break;
                     case 'Jacuzzi':
-                        servicio = 'Jacuzzi';
+                        servicio.push('Jacuzzi');
                         break;
                     case 'Aire Acondicionado':
-                        servicio = 'Aire acondicionado';
+                        servicio.push('Aire acondicionado');
                         break;
                     case 'Calefacción':
-                        servicio = 'Calefacción';
+                        servicio.push('Calefacción');
                         break;
                     case 'Lavadora':
-                        tipo = 'Lavadora';
+                        tipo.push('Lavadora');
                         break;
                     case 'Secadora':
-                        servicio = 'Secadora';
+                        servicio.push('Secadora');
                         break;
                     case 'TV':
-                        servicio = 'TV';
+                        servicio.push('TV');
                         break;
                     default:
-                        tipo = 'todos';
+                        tipo = ['todos'];
+                    }
+                }else{
+                    const nombreCategoria = this.querySelector('.category-name').textContent.trim();
+                    switch (nombreCategoria) {
+                        case 'Casas':
+                            tipo = tipo.filter(t => t !== 'Casa');
+                            break;
+                        case 'Estudio':
+                            tipo = tipo.filter(t => t !== 'Estudio');
+                            break;
+                        case 'Apartamentos':
+                            tipo = tipo.filter(t => t !== 'Apartamento');
+                            break;
+                        case 'Conectados':
+                            servicio = servicio.filter(s => s !== 'WiFi');
+                            break;
+                        case 'Cocina equipada':
+                            servicio = servicio.filter(s => s !== 'Cocina');
+                            break;
+                        case 'Estacionamiento gratuito':
+                            servicio = servicio.filter(s => s !== 'Estacionamiento gratuito');
+                            break;
+                        case 'Piscinas':
+                            servicio = servicio.filter(s => s !== 'Piscina');
+                            break;
+                        case 'Jacuzzi':
+                            servicio = servicio.filter(s => s !== 'Jacuzzi');
+                            break;
+                        case 'Aire Acondicionado':
+                            servicio = servicio.filter(s => s !== 'Aire acondicionado');
+                            break;
+                        case 'Calefacción':
+                            servicio = servicio.filter(s => s !== 'Calefacción');
+                            break;
+                        case 'Lavadora':
+                            tipo = tipo.filter(t => t !== 'Lavadora');
+                            break;
+                        case 'Secadora':
+                            servicio = servicio.filter(s => s !== 'Secadora');
+                            break;
+                        case 'TV':
+                            servicio = servicio.filter(s => s !== 'TV');
+                            break;
+                    }
                 }
-                if (servicio === "") {
-                    servicio = "none";
+                if (servicio.length == 0) {
+                    servicio.push("none");
                 }
-                if (tipo === "") {
-                    tipo = "todos";
+                if (tipo.length == 0) {
+                    tipo.push("todos");
                 }
+
                 mostrarAlojamientos(tipo, servicio);
             });
         });
