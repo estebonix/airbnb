@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,9 +12,12 @@
         <div class="header-content">
             <a href="/" class="logo">airbnb</a>
             <div class="user-menu">
-                <img src="${picture!'/img/default-avatar.jpg'}" 
-                     alt="${name!'Usuario'}" 
-                     class="user-avatar">
+                <img src="/img/default-avatar.jpg" 
+                     alt="Usuario" 
+                     class="user-avatar" id="header-avatar">
+                <button onclick="cerrarSesion()" class="edit-button" style="margin-left: 10px;">
+                    Cerrar Sesión
+                </button>
             </div>
         </div>
     </header>
@@ -34,11 +37,11 @@
         <div class="profile-content">
             <!-- Sidebar -->
             <aside class="profile-sidebar">
-                <img src="${picture!'/default-avatar.png'}" 
-                     alt="${name!'Usuario'}" 
-                     class="profile-image">
+                <img src="/img/default-avatar.jpg" 
+                     alt="Usuario" 
+                     class="profile-image" id="profile-image">
                 
-                <h2 class="profile-name">${name!username!'Usuario'}</h2>
+                <h2 class="profile-name" id="profile-name">Cargando...</h2>
                 
                 <div class="profile-verified">
                     <span class="verification-badge">✓</span>
@@ -48,11 +51,11 @@
                 <div class="profile-stats">
                     <div class="stat-item">
                         <span class="stat-icon">⭐</span>
-                        <span>4.9 estrellas (23 reseñas)</span>
+                        <span>Nuevo usuario</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-icon">🏠</span>
-                        <span>Anfitrión desde 2023</span>
+                        <span id="fecha-registro">Miembro desde</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-icon">📍</span>
@@ -60,7 +63,7 @@
                     </div>
                 </div>
 
-                <button class="edit-button" style="margin-top: 24px;">
+                <button class="edit-button" style="margin-top: 24px;" onclick="editarPerfil()">
                     Editar perfil
                 </button>
             </aside>
@@ -73,19 +76,19 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <span class="info-label">Nombre completo</span>
-                            <span class="info-value">${name!'No especificado'}</span>
+                            <span class="info-value" id="nombre-completo">No especificado</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Email</span>
-                            <span class="info-value">${email!'No especificado'}</span>
+                            <span class="info-value" id="email-usuario">No especificado</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Teléfono</span>
-                            <span class="info-value no-data">No especificado</span>
+                            <span class="info-value" id="telefono-usuario">No especificado</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Fecha de nacimiento</span>
-                            <span class="info-value no-data">No especificado</span>
+                            <span class="info-value" id="fecha-nacimiento">No especificado</span>
                         </div>
                     </div>
                 </section>
@@ -93,12 +96,10 @@
                 <!-- Acerca de mí -->
                 <section class="section">
                     <h3 class="section-title">Acerca de mí</h3>
-                    <p class="bio-text">
-                        ¡Hola! Soy un viajero apasionado que ama conocer nuevos lugares y culturas. 
-                        Me encanta la hospitalidad y crear experiencias memorables para otros viajeros. 
-                        Cuando no estoy viajando, disfruto de la cocina local y el arte.
+                    <p class="bio-text" id="biografia-usuario">
+                        No hay biografía disponible.
                     </p>
-                    <button class="secondary-button" style="margin-top: 16px;">
+                    <button class="secondary-button" style="margin-top: 16px;" onclick="editarBiografia()">
                         Editar descripción
                     </button>
                 </section>
@@ -109,7 +110,7 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <span class="info-label">✓ Email verificado</span>
-                            <span class="info-value">${email!'email@ejemplo.com'}</span>
+                            <span class="info-value" id="email-verificado">No verificado</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">⏳ Teléfono</span>
@@ -120,41 +121,26 @@
                             <span class="info-value no-data">Pendiente de verificación</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">✓ Perfil de redes sociales</span>
-                            <span class="info-value">Google</span>
+                            <span class="info-label">✓ Perfil completo</span>
+                            <span class="info-value" id="perfil-completado">En progreso</span>
                         </div>
                     </div>
                 </section>
 
-                <!-- Reseñas -->
+                <!-- Actividad reciente -->
                 <section class="section">
-                    <h3 class="section-title">Reseñas sobre ti</h3>
+                    <h3 class="section-title">Actividad reciente</h3>
                     <div class="reviews-grid">
                         <div class="review-card">
                             <div class="review-header">
                                 <div class="reviewer-avatar"></div>
                                 <div class="reviewer-info">
-                                    <div class="reviewer-name">María García</div>
-                                    <div class="review-date">Marzo 2024</div>
+                                    <div class="reviewer-name">Sistema</div>
+                                    <div class="review-date">Hoy</div>
                                 </div>
                             </div>
                             <p class="review-text">
-                                "Excelente anfitrión, muy comunicativo y servicial. 
-                                La estancia fue perfecta y el lugar exactamente como se describía."
-                            </p>
-                        </div>
-                        
-                        <div class="review-card">
-                            <div class="review-header">
-                                <div class="reviewer-avatar"></div>
-                                <div class="reviewer-info">
-                                    <div class="reviewer-name">Carlos Mendoza</div>
-                                    <div class="review-date">Febrero 2024</div>
-                                </div>
-                            </div>
-                            <p class="review-text">
-                                "Muy recomendable. Atención al detalle excepcional y 
-                                siempre dispuesto a ayudar con recomendaciones locales."
+                                "¡Bienvenido a Airbnb! Completa tu perfil para tener una mejor experiencia."
                             </p>
                         </div>
                     </div>
@@ -164,18 +150,134 @@
     </main>
 
     <script>
-        // Funcionalidad básica para los botones
-        document.querySelectorAll('.edit-button, .secondary-button').forEach(button => {
-            button.addEventListener('click', function() {
-                // Aquí puedes agregar la lógica para editar el perfil
-                console.log('Botón clickeado:', this.textContent);
-                // Por ejemplo, redirigir a una página de edición:
-                // window.location.href = '/profile/edit';
-            });
-        });
+        // Función para cargar datos del usuario
+        function cargarDatosUsuario() {
+            // Verificar si hay un usuario logueado
+            const usuarioLogueado = localStorage.getItem('usuarioLogueado');
+            const datosUsuario = localStorage.getItem('usuario');
+
+            if (usuarioLogueado === 'true' && datosUsuario) {
+                try {
+                    const usuario = JSON.parse(datosUsuario);
+                    console.log('Datos del usuario:', usuario);
+
+                    // Actualizar nombre
+                    const nombreCompleto = usuario.nombre && usuario.apellido 
+                        ? `${usuario.nombre} ${usuario.apellido}`.trim()
+                        : usuario.nombre || 'Usuario';
+                    
+                    document.getElementById('profile-name').textContent = nombreCompleto;
+                    document.getElementById('nombre-completo').textContent = nombreCompleto;
+
+                    // Actualizar email
+                    if (usuario.email) {
+                        document.getElementById('email-usuario').textContent = usuario.email;
+                        document.getElementById('email-verificado').textContent = usuario.email;
+                    }
+
+                    // Actualizar teléfono
+                    const telefonoElement = document.getElementById('telefono-usuario');
+                    if (usuario.telefono && usuario.telefono.trim() !== '') {
+                        telefonoElement.textContent = usuario.telefono;
+                        telefonoElement.className = 'info-value';
+                    } else {
+                        telefonoElement.textContent = 'No especificado';
+                        telefonoElement.className = 'info-value no-data';
+                    }
+
+                    // Actualizar fecha de nacimiento
+                    if (usuario.fechaNacimiento) {
+                        const fecha = new Date(usuario.fechaNacimiento);
+                        const fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        document.getElementById('fecha-nacimiento').textContent = fechaFormateada;
+                        document.getElementById('fecha-nacimiento').className = 'info-value';
+                    }
+
+                    // Actualizar biografía
+                    const biografiaElement = document.getElementById('biografia-usuario');
+                    if (usuario.biografia && usuario.biografia.trim() !== '') {
+                        biografiaElement.textContent = usuario.biografia;
+                    } else {
+                        biografiaElement.textContent = 'No hay biografía disponible.';
+                    }
+
+                    // Actualizar fecha de registro
+                    if (usuario.fecha_registro) {
+                        const fechaRegistro = new Date(usuario.fecha_registro);
+                        const año = fechaRegistro.getFullYear();
+                        document.getElementById('fecha-registro').textContent = `Miembro desde ${año}`;
+                    }
+
+                    // Calcular completitud del perfil
+                    let completitud = 0;
+                    const campos = [usuario.nombre, usuario.apellido, usuario.email, usuario.telefono, usuario.biografia];
+                    campos.forEach(campo => {
+                        if (campo && campo.toString().trim() !== '') {
+                            completitud += 20;
+                        }
+                    });
+
+                    document.getElementById('perfil-completado').textContent = `${completitud}% completado`;
+
+                } catch (error) {
+                    console.error('Error al parsear datos del usuario:', error);
+                    mostrarErrorSesion();
+                }
+            } else {
+                console.log('No hay usuario logueado, redirigiendo...');
+                // Redirigir al login si no hay usuario logueado
+                window.location.href = '/login';
+            }
+        }
+
+        // Función para mostrar error de sesión
+        function mostrarErrorSesion() {
+            document.getElementById('profile-name').textContent = 'Error de sesión';
+            document.getElementById('nombre-completo').textContent = 'Error al cargar datos';
+        }
+
+        // Función para cerrar sesión
+        function cerrarSesion() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                localStorage.removeItem('usuario');
+                localStorage.removeItem('usuarioLogueado');
+                window.location.href = '/login';
+            }
+        }
+
+        // Función para editar perfil (placeholder)
+        function editarPerfil() {
+            alert('Funcionalidad de edición en desarrollo. Próximamente disponible.');
+        }
+
+        // Función para editar biografía (placeholder)
+        function editarBiografia() {
+            const nuevaBiografia = prompt('Introduce tu nueva biografía:');
+            if (nuevaBiografia !== null && nuevaBiografia.trim()) {
+                // Aquí se haría la llamada al servidor para actualizar
+                document.getElementById('biografia-usuario').textContent = nuevaBiografia.trim();
+                
+                // Actualizar también en localStorage
+                const datosUsuario = localStorage.getItem('usuario');
+                if (datosUsuario) {
+                    const usuario = JSON.parse(datosUsuario);
+                    usuario.biografia = nuevaBiografia.trim();
+                    localStorage.setItem('usuario', JSON.stringify(usuario));
+                }
+                
+                alert('Biografía actualizada (cambio local, en desarrollo la sincronización con servidor)');
+            }
+        }
 
         // Animación suave al cargar
         document.addEventListener('DOMContentLoaded', function() {
+            // Cargar datos del usuario
+            cargarDatosUsuario();
+
             const profileImage = document.querySelector('.profile-image');
             const sections = document.querySelectorAll('.section');
             
@@ -201,5 +303,14 @@
                 }, 200 + (index * 100));
             });
         });
+
+        // Verificar sesión periódicamente
+        setInterval(function() {
+            const usuarioLogueado = localStorage.getItem('usuarioLogueado');
+            if (usuarioLogueado !== 'true') {
+                window.location.href = '/login';
+            }
+        }, 30000); // Verificar cada 30 segundos
     </script>
 </body>
+</html>

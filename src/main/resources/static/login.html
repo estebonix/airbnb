@@ -71,6 +71,18 @@
                     <input type="date" id="register-birthdate" name="birthdate" required>
                     <div class="error-message" id="register-birthdate-error"></div>
                 </div>
+
+                <div class="form-group">
+                    <label for="register-phone">Teléfono (opcional)</label>
+                    <input type="tel" id="register-phone" name="phone" placeholder="+34 123 456 789">
+                    <div class="error-message" id="register-phone-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-bio">Biografía (opcional)</label>
+                    <textarea id="register-bio" name="bio" placeholder="Cuéntanos algo sobre ti..." rows="3"></textarea>
+                    <div class="error-message" id="register-bio-error"></div>
+                </div>
                 
                 <button type="submit" class="submit-btn">Registrarse</button>
             </form>
@@ -109,33 +121,154 @@
             currentTab = tab;
         }
 
-        // Validaciones
-        let hasErrors = false;
-        
-        if (data.name.length < 2) {
-            showError('register-name-error', 'El nombre debe tener al menos 2 caracteres');
-            hasErrors = true;
+        // Manejar login
+        async function handleLogin(event) {
+            event.preventDefault();
+            clearMessages();
+
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            // Validaciones básicas
+            if (!validateEmail(email)) {
+                showError('login-email-error', 'Por favor ingresa un email válido');
+                return;
+            }
+
+            if (password.length < 1) {
+                showError('login-password-error', 'La contraseña es requerida');
+                return;
+            }
+
+            try {
+                // Llamada al endpoint de login
+                const response = await fetch('/usuario/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+                });
+
+                if (response.ok) {
+                    const usuario = await response.json();
+                    
+                    // Guardar datos del usuario en localStorage
+                    localStorage.setItem('usuario', JSON.stringify(usuario));
+                    localStorage.setItem('usuarioLogueado', 'true');
+                    
+                    // Mostrar mensaje de éxito
+                    showSuccess('Inicio de sesión exitoso. Redirigiendo...');
+                    
+                    // Redirigir después de 1.5 segundos
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1500);
+                } else {
+                    showError('login-password-error', 'Credenciales inválidas. Verifica tu email y contraseña.');
+                }
+            } catch (error) {
+                console.error('Error en login:', error);
+                showError('login-password-error', 'Error de conexión. Inténtalo de nuevo.');
+            }
         }
-        
-        if (data.lastname.length < 2) {
-            showError('register-lastname-error', 'El apellido debe tener al menos 2 caracteres');
-            hasErrors = true;
+
+        // Manejar registro
+        async function handleRegister(event) {
+            event.preventDefault();
+            clearMessages();
+
+            const formData = {
+                name: document.getElementById('register-name').value.trim(),
+                lastname: document.getElementById('register-lastname').value.trim(),
+                email: document.getElementById('register-email').value.trim(),
+                password: document.getElementById('register-password').value,
+                birthdate: document.getElementById('register-birthdate').value,
+                phone: document.getElementById('register-phone').value.trim(),
+                bio: document.getElementById('register-bio').value.trim()
+            };
+
+            // Validaciones
+            let hasErrors = false;
+            
+            if (formData.name.length < 2) {
+                showError('register-name-error', 'El nombre debe tener al menos 2 caracteres');
+                hasErrors = true;
+            }
+            
+            if (formData.lastname.length < 2) {
+                showError('register-lastname-error', 'El apellido debe tener al menos 2 caracteres');
+                hasErrors = true;
+            }
+            
+            if (!validateEmail(formData.email)) {
+                showError('register-email-error', 'Por favor ingresa un email válido');
+                hasErrors = true;
+            }
+            
+            if (formData.password.length < 8) {
+                showError('register-password-error', 'La contraseña debe tener al menos 8 caracteres');
+                hasErrors = true;
+            }
+            
+            // Validar edad
+            if (!validateAge(formData.birthdate)) {
+                showError('register-birthdate-error', 'Debes tener al menos 18 años para registrarte');
+                hasErrors = true;
+            }
+
+            if (hasErrors) return;
+
+            try {
+                // Preparar datos para envío
+                const params = new URLSearchParams();
+                params.append('nombre', formData.name);
+                params.append('apellido', formData.lastname);
+                params.append('email', formData.email);
+                params.append('password', formData.password);
+                params.append('fechaNacimiento', formData.birthdate);
+                if (formData.phone) params.append('telefono', formData.phone);
+                if (formData.bio) params.append('biografia', formData.bio);
+
+                // Llamada al endpoint de registro
+                const response = await fetch('/usuario/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: params.toString()
+                });
+
+                const responseText = await response.text();
+
+                if (response.ok) {
+                    showSuccess('¡Registro exitoso! Ahora puedes iniciar sesión.');
+                    
+                    // Cambiar a tab de login después de 2 segundos
+                    setTimeout(() => {
+                        const loginTab = document.querySelector('.tab-button');
+                        switchTab('login', { target: loginTab });
+                        
+                        // Pre-llenar el email en el formulario de login
+                        document.getElementById('login-email').value = formData.email;
+                    }, 2000);
+                } else {
+                    if (responseText.includes('email ya está registrado')) {
+                        showError('register-email-error', 'Este email ya está registrado. Intenta iniciar sesión.');
+                    } else {
+                        showError('register-email-error', 'Error en el registro: ' + responseText);
+                    }
+                }
+            } catch (error) {
+                console.error('Error en registro:', error);
+                showError('register-email-error', 'Error de conexión. Inténtalo de nuevo.');
+            }
         }
-        
-        if (!validateEmail(data.email)) {
-            showError('register-email-error', 'Por favor ingresa un email válido');
-            hasErrors = true;
-        }
-        
-        if (data.password.length < 8) {
-            showError('register-password-error', 'La contraseña debe tener al menos 8 caracteres');
-            hasErrors = true;
-        }
-        
-        // Validar edad
-        if (!validateAge(data.birthdate)) {
-            showError('register-birthdate-error', 'Debes tener al menos 18 años para registrarte');
-            hasErrors = true;
+
+        // Función para validar email
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
         }
 
         // Función para validar edad
@@ -163,13 +296,31 @@
             }
         }
 
+        // Función para mostrar mensajes de éxito
+        function showSuccess(message) {
+            const successElement = document.getElementById('success-message');
+            if (successElement) {
+                successElement.textContent = message;
+                successElement.style.display = 'block';
+                successElement.style.background = '#d4edda';
+                successElement.style.color = '#155724';
+                successElement.style.padding = '12px';
+                successElement.style.borderRadius = '8px';
+                successElement.style.marginBottom = '20px';
+                successElement.style.border = '1px solid #c3e6cb';
+            }
+        }
+
         // Función para limpiar mensajes
         function clearMessages() {
             document.querySelectorAll('.error-message').forEach(el => {
                 el.style.display = 'none';
                 el.textContent = '';
             });
-            document.getElementById('success-message').style.display = 'none';
+            const successElement = document.getElementById('success-message');
+            if (successElement) {
+                successElement.style.display = 'none';
+            }
         }
 
         // Inicializar cuando se carga la página
@@ -179,6 +330,11 @@
             const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
             const maxDateString = maxDate.toISOString().split('T')[0];
             document.getElementById('register-birthdate').max = maxDateString;
+            
+            // Si ya hay un usuario logueado, redirigir
+            if (localStorage.getItem('usuarioLogueado') === 'true') {
+                window.location.href = '/';
+            }
             
             console.log('Página cargada correctamente');
         });

@@ -109,7 +109,7 @@ label {
     color: #222;
 }
 
-input {
+input, textarea {
     width: 100%;
     padding: 14px 16px;
     border: 1px solid #ddd;
@@ -117,15 +117,29 @@ input {
     font-size: 16px;
     transition: all 0.3s ease;
     background: white;
+    font-family: inherit;
 }
 
-input:focus {
+/* Estilos específicos para textarea */
+textarea {
+    resize: vertical;
+    min-height: 80px;
+    max-height: 120px;
+    line-height: 1.4;
+}
+
+textarea::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+input:focus, textarea:focus {
     outline: none;
     border-color: #FF385C;
     box-shadow: 0 0 0 2px rgba(255, 56, 92, 0.15);
 }
 
-input:hover {
+input:hover, textarea:hover {
     border-color: #bbb;
 }
 
@@ -253,6 +267,31 @@ input:hover {
     display: none;
 }
 
+/* Mejoras adicionales para el formulario de registro */
+.form-group:has(textarea) {
+    margin-bottom: 24px;
+}
+
+/* Estilos para campos de teléfono */
+input[type="tel"] {
+    letter-spacing: 0.5px;
+}
+
+/* Estilos para campos de fecha */
+input[type="date"] {
+    cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.5);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    filter: invert(0.3);
+}
+
+/* Estilos responsive mejorados */
 @media (max-width: 480px) {
     body {
         padding: 10px;
@@ -260,10 +299,69 @@ input:hover {
     
     .auth-container {
         padding: 30px 20px;
+        max-width: 100%;
     }
 
     .form-row {
         flex-direction: column;
         gap: 0;
+    }
+
+    .logo h1 {
+        font-size: 24px;
+    }
+
+    textarea {
+        min-height: 60px;
+        max-height: 100px;
+    }
+}
+
+/* Estados de enfoque mejorados */
+input:focus-visible, textarea:focus-visible {
+    outline: 2px solid #FF385C;
+    outline-offset: 2px;
+}
+
+/* Mejora la accesibilidad */
+.tab-button:focus-visible {
+    outline: 2px solid #FF385C;
+    outline-offset: 2px;
+}
+
+.submit-btn:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+/* Animación de carga para el botón de envío */
+.submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.submit-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.submit-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
     }
 }

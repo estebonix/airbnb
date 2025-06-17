@@ -396,5 +396,36 @@
             });
         });
     </script>
+    <script src="/js/session-manager.js"></script>
+    <script>
+        // Inicializar sesión al cargar la página principal
+        document.addEventListener('DOMContentLoaded', function() {
+            // El sessionManager ya se inicializa automáticamente
+            
+            // Actualizar el comportamiento del botón "Publicar Alojamiento"
+            const btnPublicar = document.getElementById('abrirModal');
+            if (btnPublicar) {
+                btnPublicar.addEventListener('click', function(e) {
+                    if (!sessionManager.checkSession()) {
+                        e.preventDefault();
+                        if (confirm('Necesitas iniciar sesión para publicar un alojamiento. ¿Quieres ir al login?')) {
+                            window.location.href = '/login';
+                        }
+                    }
+                });
+            }
+
+            // Actualizar el comportamiento del perfil de usuario
+            const userProfile = document.querySelector('.user-profile');
+            if (userProfile) {
+                userProfile.addEventListener('click', function(e) {
+                    if (!sessionManager.checkSession()) {
+                        e.preventDefault();
+                        window.location.href = '/login';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
