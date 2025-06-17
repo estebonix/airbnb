@@ -50,5 +50,14 @@ public class MainController {
         model.addAttribute("imagenes", imagenes);
         return "alojamiento";
     }
-        
+
+    @GetMapping("login")
+    public String loginPage() {
+        return "redirect:/login.html";
+    }
+
+    @GetMapping("profile")
+    public String profilePage() {
+        return "profile";
+    }   
 }

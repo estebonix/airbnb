@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/login.css">
+    <title>Iniciar sesión o registrarse</title>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo">
+            <h1>airbnb</h1>
+        </div>
+
+        <div class="success-message" id="success-message"></div>
+
+        <div class="auth-tabs">
+            <button class="tab-button active" onclick="switchTab('login', event)">Iniciar sesión</button>
+            <button class="tab-button" onclick="switchTab('register', event)">Registrarse</button>
+        </div>
+
+        <!-- Formulario de Login -->
+        <div id="login-form" class="form active">
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-email">Correo electrónico</label>
+                    <input type="email" id="login-email" name="email" required placeholder="ejemplo@email.com">
+                    <div class="error-message" id="login-email-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Contraseña</label>
+                    <input type="password" id="login-password" name="password" required placeholder="Ingresa tu contraseña">
+                    <div class="error-message" id="login-password-error"></div>
+                </div>
+                
+                <button type="submit" class="submit-btn">Iniciar sesión</button>
+            </form>
+        </div>
+
+        <!-- Formulario de Registro -->
+        <div id="register-form" class="form">
+            <form onsubmit="handleRegister(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="register-name">Nombre</label>
+                        <input type="text" id="register-name" name="name" required placeholder="Tu nombre">
+                        <div class="error-message" id="register-name-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-lastname">Apellido</label>
+                        <input type="text" id="register-lastname" name="lastname" required placeholder="Tu apellido">
+                        <div class="error-message" id="register-lastname-error"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-email">Correo electrónico</label>
+                    <input type="email" id="register-email" name="email" required placeholder="tu@email.com">
+                    <div class="error-message" id="register-email-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-password">Contraseña</label>
+                    <input type="password" id="register-password" name="password" required minlength="8" placeholder="Mínimo 8 caracteres">
+                    <div class="error-message" id="register-password-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-birthdate">Fecha de nacimiento</label>
+                    <input type="date" id="register-birthdate" name="birthdate" required>
+                    <div class="error-message" id="register-birthdate-error"></div>
+                </div>
+                
+                <button type="submit" class="submit-btn">Registrarse</button>
+            </form>
+
+            <div class="terms">
+                Al seleccionar Aceptar y continuar a continuación, acepto los 
+                <a href="#">Términos del Servicio</a>, los 
+                <a href="#">Términos del servicio de Pagos</a>, la 
+                <a href="#">Política de no discriminación</a> y reconozco la 
+                <a href="#">Política de Privacidad</a> de Airbnb.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentTab = 'login';
+
+        // Función para cambiar pestañas
+        function switchTab(tab, event) {
+            // Limpiar mensajes
+            clearMessages();
+            
+            // Cambiar pestañas activas
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Cambiar formularios
+            document.querySelectorAll('.form').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.getElementById(tab + '-form').classList.add('active');
+            
+            currentTab = tab;
+        }
+
+        // Validaciones
+        let hasErrors = false;
+        
+        if (data.name.length < 2) {
+            showError('register-name-error', 'El nombre debe tener al menos 2 caracteres');
+            hasErrors = true;
+        }
+        
+        if (data.lastname.length < 2) {
+            showError('register-lastname-error', 'El apellido debe tener al menos 2 caracteres');
+            hasErrors = true;
+        }
+        
+        if (!validateEmail(data.email)) {
+            showError('register-email-error', 'Por favor ingresa un email válido');
+            hasErrors = true;
+        }
+        
+        if (data.password.length < 8) {
+            showError('register-password-error', 'La contraseña debe tener al menos 8 caracteres');
+            hasErrors = true;
+        }
+        
+        // Validar edad
+        if (!validateAge(data.birthdate)) {
+            showError('register-birthdate-error', 'Debes tener al menos 18 años para registrarte');
+            hasErrors = true;
+        }
+
+        // Función para validar edad
+        function validateAge(birthdate) {
+            if (!birthdate) return false;
+            
+            const birth = new Date(birthdate);
+            const today = new Date();
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            
+            return age >= 18;
+        }
+
+        // Función para mostrar errores
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+        }
+
+        // Función para limpiar mensajes
+        function clearMessages() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+            document.getElementById('success-message').style.display = 'none';
+        }
+
+        // Inicializar cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Establecer fecha máxima para el campo de nacimiento
+            const today = new Date();
+            const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+            const maxDateString = maxDate.toISOString().split('T')[0];
+            document.getElementById('register-birthdate').max = maxDateString;
+            
+            console.log('Página cargada correctamente');
+        });
+    </script>
+</body>
+</html>

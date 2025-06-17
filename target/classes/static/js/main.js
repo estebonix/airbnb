@@ -7,7 +7,17 @@ async function mostrarAlojamientos(tipo, servicio) {
         for (const alojamiento of alojamientos) {
             if (tipo.includes(alojamiento.tipoAlojamiento) || tipo.includes('todos')) {
                 let servicios = await getServiciosByAlojamientoId(alojamiento.id);
-                if (servicio.includes('none') || servicios.includes(servicio)) {
+                let contenido = false;
+                let todosContenidos = true;
+                for (element of servicios) {
+                    if(servicio.includes(element)) {
+                        contenido = true;   
+                        break;
+                    }else{
+                        todosContenidos = false;
+                    }
+                }
+                if (servicio.includes('none') || (contenido || todosContenidos)) {
                     let mainImageUrl = await getMainImage(alojamiento.id);
                     let valoracionMedia = await getValoracionMedia(alojamiento.id);
                     listings.innerHTML += `
@@ -70,7 +80,7 @@ async function getServiciosByAlojamientoId(alojamientoId) {
     const response = await fetch("http://localhost:8080/servicios?alojamientoId=" + alojamientoId);
     if (!response.ok) {
         throw new Error('Error en la respuesta de la API para obtener los servicios del alojamiento');
-    } else {
+    } else {  
         return response.json();
     }
 }

@@ -10,14 +10,11 @@ public class UsuarioDTO {
     private String contraseña;
     private Date fechaNacimiento;
     private String telefono;
-    private String es_superhost;
-    private String calificacion_promedio;
     private String biografia;
     private String fecha_registro;
 
     public UsuarioDTO(Long id, String nombre, String apellido, String email, String contraseña, Date fechaNacimiento,
-            String telefono, String es_superhost, String calificacion_promedio, String biografia,
-            String fecha_registro) {
+            String telefono, String biografia, String fecha_registro) {
         this.id = id;
         this.nombre = nombre;
         this.apellido = apellido;
@@ -25,8 +22,6 @@ public class UsuarioDTO {
         this.contraseña = contraseña;
         this.fechaNacimiento = fechaNacimiento;
         this.telefono = telefono;
-        this.es_superhost = es_superhost;
-        this.calificacion_promedio = calificacion_promedio;
         this.biografia = biografia;
         this.fecha_registro = fecha_registro;
     }
@@ -73,18 +68,6 @@ public class UsuarioDTO {
     public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
-    public String getEs_superhost() {
-        return es_superhost;
-    }
-    public void setEs_superhost(String es_superhost) {
-        this.es_superhost = es_superhost;
-    }
-    public String getCalificacion_promedio() {
-        return calificacion_promedio;
-    }
-    public void setCalificacion_promedio(String calificacion_promedio) {
-        this.calificacion_promedio = calificacion_promedio;
-    }
     public String getBiografia() {
         return biografia;
     }
@@ -97,6 +80,4 @@ public class UsuarioDTO {
     public void setFecha_registro(String fecha_registro) {
         this.fecha_registro = fecha_registro;
     }
-
-    
 }

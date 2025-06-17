@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alojamientos - Encuentra casas, apartamentos y experiencias únicas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
     <!-- Header -->
@@ -33,7 +33,7 @@
                 <div class="globe-icon">
                     <i class="fas fa-globe"></i>
                 </div>
-                <div class="user-profile">
+                <div class="user-profile" onclick="window.location.href='/profile'">
                     <i class="fas fa-bars"></i>
                     <div class="user-avatar">
                         <i class="fas fa-user"></i>
@@ -238,8 +238,8 @@
         </div>
     </div>
 
-    <script src="js/main.js"></script>
-    <script src="js/newAlojamiento.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/newAlojamiento.js"></script>
     <script>
         mostrarAlojamientos("todos", "none");
 
@@ -392,7 +392,6 @@
                 if (tipo.length == 0) {
                     tipo.push("todos");
                 }
-
                 mostrarAlojamientos(tipo, servicio);
             });
         });
