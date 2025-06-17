@@ -33,7 +33,7 @@
                 <div class="globe-icon">
                     <i class="fas fa-globe"></i>
                 </div>
-                <div class="user-profile" onclick="window.location.href='/profile'">
+                <div class="user-profile">
                     <i class="fas fa-bars"></i>
                     <div class="user-avatar">
                         <i class="fas fa-user"></i>
@@ -408,9 +408,7 @@
                 btnPublicar.addEventListener('click', function(e) {
                     if (!sessionManager.checkSession()) {
                         e.preventDefault();
-                        if (confirm('Necesitas iniciar sesión para publicar un alojamiento. ¿Quieres ir al login?')) {
-                            window.location.href = '/login';
-                        }
+                        window.location.href = '/login';
                     }
                 });
             }

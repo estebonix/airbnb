@@ -33,284 +33,290 @@
             <p class="profile-subtitle">Esta es tu información personal de Airbnb</p>
         </div>
 
-        <!-- Profile Content -->
-        <div class="profile-content">
-            <!-- Sidebar -->
-            <aside class="profile-sidebar">
-                <img src="/img/default-avatar.jpg" 
-                     alt="Usuario" 
-                     class="profile-image" id="profile-image">
-                
-                <h2 class="profile-name" id="profile-name">Cargando...</h2>
-                
-                <div class="profile-verified">
-                    <span class="verification-badge">✓</span>
-                    Identidad verificada
-                </div>
-
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <span class="stat-icon">⭐</span>
-                        <span>Nuevo usuario</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-icon">🏠</span>
-                        <span id="fecha-registro">Miembro desde</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-icon">📍</span>
-                        <span>España</span>
-                    </div>
-                </div>
-
-                <button class="edit-button" style="margin-top: 24px;" onclick="editarPerfil()">
-                    Editar perfil
-                </button>
-            </aside>
-
-            <!-- Main Profile Info -->
-            <div class="profile-main">
-                <!-- Información Personal -->
-                <section class="section">
-                    <h3 class="section-title">Información personal</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Nombre completo</span>
-                            <span class="info-value" id="nombre-completo">No especificado</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Email</span>
-                            <span class="info-value" id="email-usuario">No especificado</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Teléfono</span>
-                            <span class="info-value" id="telefono-usuario">No especificado</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Fecha de nacimiento</span>
-                            <span class="info-value" id="fecha-nacimiento">No especificado</span>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Acerca de mí -->
-                <section class="section">
-                    <h3 class="section-title">Acerca de mí</h3>
-                    <p class="bio-text" id="biografia-usuario">
-                        No hay biografía disponible.
-                    </p>
-                    <button class="secondary-button" style="margin-top: 16px;" onclick="editarBiografia()">
-                        Editar descripción
-                    </button>
-                </section>
-
-                <!-- Verificaciones -->
-                <section class="section">
-                    <h3 class="section-title">Verificaciones</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">✓ Email verificado</span>
-                            <span class="info-value" id="email-verificado">No verificado</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">⏳ Teléfono</span>
-                            <span class="info-value no-data">Pendiente de verificación</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">⏳ Documento de identidad</span>
-                            <span class="info-value no-data">Pendiente de verificación</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">✓ Perfil completo</span>
-                            <span class="info-value" id="perfil-completado">En progreso</span>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Actividad reciente -->
-                <section class="section">
-                    <h3 class="section-title">Actividad reciente</h3>
-                    <div class="reviews-grid">
-                        <div class="review-card">
-                            <div class="review-header">
-                                <div class="reviewer-avatar"></div>
-                                <div class="reviewer-info">
-                                    <div class="reviewer-name">Sistema</div>
-                                    <div class="review-date">Hoy</div>
-                                </div>
-                            </div>
-                            <p class="review-text">
-                                "¡Bienvenido a Airbnb! Completa tu perfil para tener una mejor experiencia."
-                            </p>
-                        </div>
-                    </div>
-                </section>
+        <#if needsEmailFromJS?? && needsEmailFromJS>
+            <!-- Loading State - JavaScript manejará la carga -->
+            <div id="loading-state" style="text-align: center; padding: 50px;">
+                <div style="font-size: 18px; color: #666;">Cargando perfil...</div>
             </div>
-        </div>
+
+            <!-- Error State -->
+            <div id="error-state" style="display: none; text-align: center; padding: 50px;">
+                <div style="font-size: 18px; color: #dc3545; margin-bottom: 20px;">
+                    <#if error??>
+                        ${error}
+                    <#else>
+                        Error al cargar el perfil
+                    </#if>
+                </div>
+                <button onclick="location.reload()" class="edit-button">
+                    Intentar de nuevo
+                </button>
+                <button onclick="cerrarSesion()" class="secondary-button" style="margin-left: 10px;">
+                    Cerrar Sesión
+                </button>
+            </div>
+
+        <#else>
+            <!-- Profile Content - Datos desde el servidor -->
+            <div class="profile-content">
+                <!-- Sidebar -->
+                <aside class="profile-sidebar">
+                    <img src="/img/default-avatar.jpg" 
+                         alt="${nombreCompleto!'Usuario'}" 
+                         class="profile-image">
+                    
+                    <h2 class="profile-name">${nombreCompleto!'Usuario'}</h2>
+                    
+                    <div class="profile-verified">
+                        <span class="verification-badge">✓</span>
+                        Identidad verificada
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-icon">⭐</span>
+                            <span>Nuevo usuario</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">🏠</span>
+                            <span>
+                                <#if añoRegistro??>
+                                    Miembro desde ${añoRegistro}
+                                <#else>
+                                    Miembro desde 2024
+                                </#if>
+                            </span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">📍</span>
+                            <span>España</span>
+                        </div>
+                    </div>
+
+                    <button class="edit-button" style="margin-top: 24px;" onclick="editarPerfil()">
+                        Editar perfil
+                    </button>
+                </aside>
+
+                <!-- Main Profile Info -->
+                <div class="profile-main">
+                    <!-- Información Personal -->
+                    <section class="section">
+                        <h3 class="section-title">Información personal</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Nombre completo</span>
+                                <span class="info-value">
+                                    <#if nombreCompleto?? && nombreCompleto?trim != "" && nombreCompleto != "Usuario">
+                                        ${nombreCompleto}
+                                    <#else>
+                                        <span class="no-data">No especificado</span>
+                                    </#if>
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Email</span>
+                                <span class="info-value">
+                                    <#if email??>
+                                        ${email}
+                                    <#else>
+                                        <span class="no-data">No especificado</span>
+                                    </#if>
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Teléfono</span>
+                                <span class="info-value">
+                                    <#if telefono?? && telefono?trim != "">
+                                        ${telefono}
+                                    <#else>
+                                        <span class="no-data">No especificado</span>
+                                    </#if>
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Fecha de nacimiento</span>
+                                <span class="info-value">
+                                    <#if fechaNacimiento??>
+                                        <#-- Formatear fecha de nacimiento si existe -->
+                                        ${fechaNacimiento?string("dd 'de' MMMM 'de' yyyy")}
+                                    <#else>
+                                        <span class="no-data">No especificado</span>
+                                    </#if>
+                                </span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Acerca de mí -->
+                    <section class="section">
+                        <h3 class="section-title">Acerca de mí</h3>
+                        <p class="bio-text">
+                            <#if biografia?? && biografia?trim != "">
+                                ${biografia}
+                            <#else>
+                                No hay biografía disponible.
+                            </#if>
+                        </p>
+                        <button class="secondary-button" style="margin-top: 16px;" onclick="editarBiografia()">
+                            Editar descripción
+                        </button>
+                    </section>
+
+                    <!-- Verificaciones -->
+                    <section class="section">
+                        <h3 class="section-title">Verificaciones</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">✓ Email verificado</span>
+                                <span class="info-value">
+                                    <#if email??>
+                                        ${email}
+                                    <#else>
+                                        No verificado
+                                    </#if>
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">
+                                    <#if telefono?? && telefono?trim != "">
+                                        ✓ Teléfono verificado
+                                    <#else>
+                                        ⏳ Teléfono
+                                    </#if>
+                                </span>
+                                <span class="info-value">
+                                    <#if telefono?? && telefono?trim != "">
+                                        ${telefono}
+                                    <#else>
+                                        <span class="no-data">Pendiente de verificación</span>
+                                    </#if>
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">⏳ Documento de identidad</span>
+                                <span class="info-value no-data">Pendiente de verificación</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">✓ Perfil completo</span>
+                                <span class="info-value">
+                                    <#if completitudPerfil??>
+                                        ${completitudPerfil}% completado
+                                    <#else>
+                                        En progreso
+                                    </#if>
+                                </span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Actividad reciente -->
+                    <section class="section">
+                        <h3 class="section-title">Actividad reciente</h3>
+                        <div class="reviews-grid">
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <div class="reviewer-avatar"></div>
+                                    <div class="reviewer-info">
+                                        <div class="reviewer-name">Sistema</div>
+                                        <div class="review-date">
+                                            <#if añoRegistro??>
+                                                ${añoRegistro}
+                                            <#else>
+                                                2024
+                                            </#if>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="review-text">
+                                    ¡Bienvenido a Airbnb! Tu perfil está 
+                                    <#if completitudPerfil?? && (completitudPerfil >= 80)>
+                                        casi completo.
+                                    <#elseif completitudPerfil?? && (completitudPerfil >= 50)>
+                                        en progreso. Completa más información para una mejor experiencia.
+                                    <#else>
+                                        iniciado. Completa tu información personal para tener acceso a todas las funcionalidades.
+                                    </#if>
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </#if>
     </main>
 
     <script>
-        // Función para cargar datos del usuario
-        function cargarDatosUsuario() {
-            // Verificar si hay un usuario logueado
-            const usuarioLogueado = localStorage.getItem('usuarioLogueado');
-            const datosUsuario = localStorage.getItem('usuario');
-
-            if (usuarioLogueado === 'true' && datosUsuario) {
-                try {
-                    const usuario = JSON.parse(datosUsuario);
-                    console.log('Datos del usuario:', usuario);
-
-                    // Actualizar nombre
-                    const nombreCompleto = usuario.nombre && usuario.apellido 
-                        ? `${usuario.nombre} ${usuario.apellido}`.trim()
-                        : usuario.nombre || 'Usuario';
-                    
-                    document.getElementById('profile-name').textContent = nombreCompleto;
-                    document.getElementById('nombre-completo').textContent = nombreCompleto;
-
-                    // Actualizar email
-                    if (usuario.email) {
-                        document.getElementById('email-usuario').textContent = usuario.email;
-                        document.getElementById('email-verificado').textContent = usuario.email;
-                    }
-
-                    // Actualizar teléfono
-                    const telefonoElement = document.getElementById('telefono-usuario');
-                    if (usuario.telefono && usuario.telefono.trim() !== '') {
-                        telefonoElement.textContent = usuario.telefono;
-                        telefonoElement.className = 'info-value';
-                    } else {
-                        telefonoElement.textContent = 'No especificado';
-                        telefonoElement.className = 'info-value no-data';
-                    }
-
-                    // Actualizar fecha de nacimiento
-                    if (usuario.fechaNacimiento) {
-                        const fecha = new Date(usuario.fechaNacimiento);
-                        const fechaFormateada = fecha.toLocaleDateString('es-ES', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                        });
-                        document.getElementById('fecha-nacimiento').textContent = fechaFormateada;
-                        document.getElementById('fecha-nacimiento').className = 'info-value';
-                    }
-
-                    // Actualizar biografía
-                    const biografiaElement = document.getElementById('biografia-usuario');
-                    if (usuario.biografia && usuario.biografia.trim() !== '') {
-                        biografiaElement.textContent = usuario.biografia;
-                    } else {
-                        biografiaElement.textContent = 'No hay biografía disponible.';
-                    }
-
-                    // Actualizar fecha de registro
-                    if (usuario.fecha_registro) {
-                        const fechaRegistro = new Date(usuario.fecha_registro);
-                        const año = fechaRegistro.getFullYear();
-                        document.getElementById('fecha-registro').textContent = `Miembro desde ${año}`;
-                    }
-
-                    // Calcular completitud del perfil
-                    let completitud = 0;
-                    const campos = [usuario.nombre, usuario.apellido, usuario.email, usuario.telefono, usuario.biografia];
-                    campos.forEach(campo => {
-                        if (campo && campo.toString().trim() !== '') {
-                            completitud += 20;
-                        }
-                    });
-
-                    document.getElementById('perfil-completado').textContent = `${completitud}% completado`;
-
-                } catch (error) {
-                    console.error('Error al parsear datos del usuario:', error);
-                    mostrarErrorSesion();
-                }
-            } else {
-                console.log('No hay usuario logueado, redirigiendo...');
-                // Redirigir al login si no hay usuario logueado
-                window.location.href = '/login';
-            }
-        }
-
-        // Función para mostrar error de sesión
-        function mostrarErrorSesion() {
-            document.getElementById('profile-name').textContent = 'Error de sesión';
-            document.getElementById('nombre-completo').textContent = 'Error al cargar datos';
-        }
-
         // Función para cerrar sesión
         function cerrarSesion() {
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                localStorage.removeItem('usuario');
+                localStorage.removeItem('userEmail');
                 localStorage.removeItem('usuarioLogueado');
                 window.location.href = '/login';
             }
         }
 
-        // Función para editar perfil (placeholder)
+        // Función para editar perfil
         function editarPerfil() {
             alert('Funcionalidad de edición en desarrollo. Próximamente disponible.');
         }
 
-        // Función para editar biografía (placeholder)
+        // Función para editar biografía
         function editarBiografia() {
-            const nuevaBiografia = prompt('Introduce tu nueva biografía:');
-            if (nuevaBiografia !== null && nuevaBiografia.trim()) {
-                // Aquí se haría la llamada al servidor para actualizar
-                document.getElementById('biografia-usuario').textContent = nuevaBiografia.trim();
-                
-                // Actualizar también en localStorage
-                const datosUsuario = localStorage.getItem('usuario');
-                if (datosUsuario) {
-                    const usuario = JSON.parse(datosUsuario);
-                    usuario.biografia = nuevaBiografia.trim();
-                    localStorage.setItem('usuario', JSON.stringify(usuario));
-                }
-                
-                alert('Biografía actualizada (cambio local, en desarrollo la sincronización con servidor)');
+            const biografiaActual = '${biografia!""}';
+            const nuevaBiografia = prompt('Introduce tu nueva biografía:', biografiaActual);
+            if (nuevaBiografia !== null) {
+                // Aquí se haría una llamada al servidor para actualizar la biografía
+                alert('Funcionalidad de edición en desarrollo. Próximamente disponible.');
             }
         }
 
-        // Animación suave al cargar
+        // Solo ejecutar JavaScript si necesitamos obtener el email desde localStorage
+        <#if needsEmailFromJS?? && needsEmailFromJS>
         document.addEventListener('DOMContentLoaded', function() {
-            // Cargar datos del usuario
-            cargarDatosUsuario();
-
-            const profileImage = document.querySelector('.profile-image');
-            const sections = document.querySelectorAll('.section');
+            console.log('=== CARGANDO PERFIL DESDE JAVASCRIPT ===');
             
-            // Fade in para la imagen de perfil
-            if (profileImage) {
-                profileImage.style.opacity = '0';
-                profileImage.style.transform = 'scale(0.8)';
+            // Verificar sesión
+            const usuarioLogueado = localStorage.getItem('usuarioLogueado');
+            const userEmail = localStorage.getItem('userEmail');
+            
+            console.log('Usuario logueado:', usuarioLogueado);
+            console.log('Email guardado:', userEmail);
+            
+            if (usuarioLogueado !== 'true' || !userEmail) {
+                console.log('Sesión inválida, mostrando error...');
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('error-state').style.display = 'block';
+                
+                // Redirigir después de 3 segundos
                 setTimeout(() => {
-                    profileImage.style.transition = 'all 0.5s ease';
-                    profileImage.style.opacity = '1';
-                    profileImage.style.transform = 'scale(1)';
-                }, 100);
+                    window.location.href = '/login';
+                }, 3000);
+                return;
             }
-
-            // Fade in para las secciones
-            sections.forEach((section, index) => {
-                section.style.opacity = '0';
-                section.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    section.style.transition = 'all 0.5s ease';
-                    section.style.opacity = '1';
-                    section.style.transform = 'translateY(0)';
-                }, 200 + (index * 100));
-            });
+            
+            // Redirigir con el email como parámetro
+            console.log('Redirigiendo con email:', userEmail);
+            window.location.href = '/profile?email=' + encodeURIComponent(userEmail);
         });
+        </#if>
 
-        // Verificar sesión periódicamente
+        // Verificación periódica de sesión
         setInterval(function() {
             const usuarioLogueado = localStorage.getItem('usuarioLogueado');
             if (usuarioLogueado !== 'true') {
                 window.location.href = '/login';
             }
-        }, 30000); // Verificar cada 30 segundos
+        }, 60000); // Verificar cada minuto
+
+        // Debug: Mostrar información del usuario en consola
+        <#if !needsEmailFromJS?? || !needsEmailFromJS>
+        console.log('=== DATOS DEL PERFIL CARGADOS ===');
+        console.log('Nombre:', '${nombreCompleto!"No disponible"}');
+        console.log('Email:', '${email!"No disponible"}');
+        console.log('Teléfono:', '${telefono!"No disponible"}');
+        console.log('Completitud:', '${completitudPerfil!0}%');
+        </#if>
     </script>
 </body>
 </html>

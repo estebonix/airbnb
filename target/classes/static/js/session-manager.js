@@ -17,36 +17,42 @@ class SessionManager {
     // Verificar si hay una sesión activa
     checkSession() {
         const usuarioLogueado = localStorage.getItem('usuarioLogueado');
-        const datosUsuario = localStorage.getItem('usuario');
+        const userEmail = localStorage.getItem('userEmail');
         
-        return usuarioLogueado === 'true' && datosUsuario !== null;
+        return usuarioLogueado === 'true' && userEmail !== null;
     }
 
-    // Obtener datos del usuario actual
-    getCurrentUser() {
-        const datosUsuario = localStorage.getItem('usuario');
-        if (datosUsuario) {
-            try {
-                return JSON.parse(datosUsuario);
-            } catch (error) {
-                console.error('Error al parsear datos del usuario:', error);
-                this.logout();
-                return null;
+    // Obtener email del usuario actual
+    getCurrentUserEmail() {
+        return localStorage.getItem('userEmail');
+    }
+
+    // Obtener datos del usuario actual (desde el servidor)
+    async getCurrentUser() {
+        const email = this.getCurrentUserEmail();
+        if (!email) return null;
+
+        try {
+            const response = await fetch(`/usuario/email/${encodeURIComponent(email)}`);
+            if (response.ok) {
+                return await response.json();
             }
+        } catch (error) {
+            console.error('Error al obtener datos del usuario:', error);
         }
         return null;
     }
 
-    // Guardar sesión del usuario
-    saveSession(userData) {
-        localStorage.setItem('usuario', JSON.stringify(userData));
+    // Guardar sesión del usuario (solo email)
+    saveSession(email) {
+        localStorage.setItem('userEmail', email);
         localStorage.setItem('usuarioLogueado', 'true');
         this.updateUI();
     }
 
     // Cerrar sesión
     logout() {
-        localStorage.removeItem('usuario');
+        localStorage.removeItem('userEmail');
         localStorage.removeItem('usuarioLogueado');
         this.updateUI();
         
@@ -57,25 +63,27 @@ class SessionManager {
     }
 
     // Actualizar interfaz según el estado de la sesión
-    updateUI() {
+    async updateUI() {
         const isLoggedIn = this.checkSession();
-        const currentUser = this.getCurrentUser();
-
-        // Actualizar botones de navegación
-        this.updateNavigationButtons(isLoggedIn, currentUser);
         
-        // Actualizar menú de usuario
-        this.updateUserMenu(isLoggedIn, currentUser);
+        if (isLoggedIn) {
+            const currentUser = await this.getCurrentUser();
+            this.updateNavigationButtons(isLoggedIn, currentUser);
+            this.updateUserMenu(isLoggedIn, currentUser);
+        } else {
+            this.updateNavigationButtons(false, null);
+            this.updateUserMenu(false, null);
+        }
     }
 
     // Actualizar botones de navegación
     updateNavigationButtons(isLoggedIn, currentUser) {
-        // Botón "Publicar Alojamiento" - cambiar texto si está logueado
+        // Botón "Publicar Alojamiento"
         const publishButton = document.getElementById('abrirModal');
         if (publishButton) {
             if (isLoggedIn) {
                 publishButton.textContent = 'Publicar Alojamiento';
-                publishButton.style.display = 'block';
+                publishButton.onclick = null; // Restaurar función original
             } else {
                 publishButton.textContent = 'Iniciar Sesión';
                 publishButton.onclick = () => {
@@ -89,7 +97,6 @@ class SessionManager {
         profileLinks.forEach(link => {
             if (isLoggedIn) {
                 link.href = '/profile';
-                link.style.display = 'block';
             } else {
                 link.href = '/login';
             }
@@ -137,9 +144,10 @@ class SessionManager {
             margin-top: 8px;
         `;
 
+        const nombreCompleto = `${currentUser.nombre || ''} ${currentUser.apellido || ''}`.trim();
         dropdown.innerHTML = `
             <div style="padding: 12px 16px; border-bottom: 1px solid #eeeeee;">
-                <div style="font-weight: 600; font-size: 14px;">${currentUser.nombre} ${currentUser.apellido || ''}</div>
+                <div style="font-weight: 600; font-size: 14px;">${nombreCompleto}</div>
                 <div style="color: #717171; font-size: 12px;">${currentUser.email}</div>
             </div>
             <a href="/profile" style="display: block; padding: 12px 16px; text-decoration: none; color: #222222; border-bottom: 1px solid #eeeeee;">
@@ -197,7 +205,6 @@ class SessionManager {
     startSessionCheck() {
         setInterval(() => {
             // Verificar si la sesión sigue siendo válida
-            // Aquí se podría hacer una verificación con el servidor
             if (!this.checkSession() && !window.location.pathname.includes('login')) {
                 this.logout();
             }
@@ -216,8 +223,8 @@ function requireAuth() {
     return sessionManager.requireAuth();
 }
 
-function getCurrentUser() {
-    return sessionManager.getCurrentUser();
+function getCurrentUserEmail() {
+    return sessionManager.getCurrentUserEmail();
 }
 
 function logout() {
