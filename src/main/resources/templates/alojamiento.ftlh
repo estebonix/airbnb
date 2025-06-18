@@ -263,7 +263,7 @@
         
         console.log('Enviando solicitud de eliminación...');
         
-        fetch(`/alojamiento/delete/${id}?emailPropietario=${encodeURIComponent(userEmail)}`, {
+        fetch(`/alojamiento/delete/${id}?emailPropietario=${(userEmail)!""}`, {
             method: 'DELETE'
         })
         .then(response => {
