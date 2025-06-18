@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,7 +81,7 @@ public class AlojamientoServices {
                     u.biografia as 'u.biografia', u.fecha_registro as 'u.fecha_registro'
                 FROM alojamientos a 
                 INNER JOIN usuarios u ON a.id_usuario = u.id
-                ORDER BY a.id
+                ORDER BY a.id DESC
                 """;
 
             PreparedStatement ps = conn.prepareStatement(query);
@@ -144,7 +145,7 @@ public class AlojamientoServices {
                 FROM alojamientos a 
                 INNER JOIN usuarios u ON a.id_usuario = u.id 
                 WHERE a.id_usuario = ?
-                ORDER BY a.id
+                ORDER BY a.id DESC
                 """;
 
             PreparedStatement ps = conn.prepareStatement(query);
@@ -178,7 +179,7 @@ public class AlojamientoServices {
                 FROM alojamientos a 
                 INNER JOIN usuarios u ON a.id_usuario = u.id 
                 WHERE u.email = ?
-                ORDER BY a.id
+                ORDER BY a.id DESC
                 """;
 
             PreparedStatement ps = conn.prepareStatement(query);
@@ -196,8 +197,8 @@ public class AlojamientoServices {
         }
     }
 
-    // Agregar un nuevo alojamiento (con propietario por email)
-    public String addAlojamiento(AlojamientoDTO alojamiento, String emailPropietario) {
+    // Agregar un nuevo alojamiento y devolver su ID
+    public Long addAlojamientoConId(AlojamientoDTO alojamiento, String emailPropietario) {
         try (Connection conn = DriverManager.getConnection(databaseUrl, "usuario", "usuario")) {
             // Primero obtener el ID del usuario por email
             PreparedStatement userPs = conn.prepareStatement("SELECT id FROM usuarios WHERE email = ?");
@@ -205,15 +206,17 @@ public class AlojamientoServices {
             ResultSet userRs = userPs.executeQuery();
 
             if (!userRs.next()) {
-                return "Usuario no encontrado";
+                throw new RuntimeException("Usuario no encontrado");
             }
 
             Long idUsuario = userRs.getLong("id");
 
-            // Insertar el alojamiento
+            // Insertar el alojamiento y obtener el ID generado
             PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO alojamientos (titulo, descripcion, tipo_alojamiento, capacidad, habitaciones, camas, banos, precio_noche, direccion, direccion_descripcion, ciudad, pais, codigo_postal, fecha_registro, id_usuario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_DATE, ?)"
+                "INSERT INTO alojamientos (titulo, descripcion, tipo_alojamiento, capacidad, habitaciones, camas, banos, precio_noche, direccion, direccion_descripcion, ciudad, pais, codigo_postal, fecha_registro, id_usuario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_DATE, ?)",
+                Statement.RETURN_GENERATED_KEYS
             );
+            
             ps.setString(1, alojamiento.getTitulo());
             ps.setString(2, alojamiento.getDescripcion());
             ps.setString(3, alojamiento.getTipoAlojamiento());
@@ -231,6 +234,129 @@ public class AlojamientoServices {
 
             int rows = ps.executeUpdate();
             if (rows > 0) {
+                ResultSet generatedKeys = ps.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getLong(1);
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al crear alojamiento: " + e.getMessage());
+        }
+    }
+
+    // Insertar imagen en la base de datos (ajustado para int)
+    public void insertarImagen(Long alojamientoId, String descripcion, String urlImagen, int esPrincipal, int orden) {
+        try (Connection conn = DriverManager.getConnection(databaseUrl, "usuario", "usuario")) {
+            // Generar código corto que quepa en varchar(10)
+            // Formato: IMG + 2 dígitos del alojamientoId + 2 dígitos del orden + 1 dígito random
+            String codigo = String.format("IMG%02d%02d%d", 
+                alojamientoId % 100,  // Últimos 2 dígitos del ID
+                orden % 100,          // Orden (máximo 99)
+                (int)(Math.random() * 10)  // Dígito random para unicidad
+            );
+            
+            // Asegurar que el código no exceda 10 caracteres
+            if (codigo.length() > 10) {
+                codigo = codigo.substring(0, 10);
+            }
+            
+            PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO imagenes_alojamiento (codigo, descripcion, alojamiento_id, url_imagen, es_principal, orden) VALUES (?, ?, ?, ?, ?, ?)"
+            );
+            ps.setString(1, codigo);
+            ps.setString(2, descripcion != null ? descripcion : "Imagen del alojamiento");
+            ps.setInt(3, alojamientoId.intValue()); // Convertir Long a int para la BD
+            ps.setString(4, urlImagen);
+            ps.setInt(5, esPrincipal);
+            ps.setInt(6, orden);
+            
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new RuntimeException("No se pudo insertar la imagen");
+            }
+            
+            System.out.println("Imagen insertada correctamente: " + codigo + " para alojamiento " + alojamientoId);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error detallado al insertar imagen: " + e.getMessage());
+            throw new RuntimeException("Error al insertar imagen: " + e.getMessage());
+        }
+    }
+
+    // Asociar servicio al alojamiento (ajustado para int)
+    public void asociarServicio(Long alojamientoId, String nombreServicio) {
+        try (Connection conn = DriverManager.getConnection(databaseUrl, "usuario", "usuario")) {
+            System.out.println("Asociando servicio '" + nombreServicio + "' al alojamiento " + alojamientoId);
+            
+            // Primero buscar si el servicio existe
+            PreparedStatement buscarPs = conn.prepareStatement("SELECT id FROM servicios WHERE descripcion = ?");
+            buscarPs.setString(1, nombreServicio);
+            ResultSet rs = buscarPs.executeQuery();
+            
+            Long servicioId;
+            if (rs.next()) {
+                servicioId = rs.getLong("id");
+                System.out.println("Servicio existente encontrado con ID: " + servicioId);
+            } else {
+                // Si no existe, crearlo
+                System.out.println("Creando nuevo servicio: " + nombreServicio);
+                PreparedStatement crearPs = conn.prepareStatement(
+                    "INSERT INTO servicios (codigo, descripcion, icono) VALUES (?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+                );
+                String codigo = nombreServicio.toLowerCase()
+                    .replace(" ", "_")
+                    .replace("ñ", "n")
+                    .replaceAll("[^a-z0-9_]", ""); // Limpiar caracteres especiales
+                
+                // Limitar código a longitud apropiada si es necesario
+                if (codigo.length() > 50) {
+                    codigo = codigo.substring(0, 50);
+                }
+                
+                crearPs.setString(1, codigo);
+                crearPs.setString(2, nombreServicio);
+                crearPs.setString(3, "default.png"); // Icono por defecto
+                
+                crearPs.executeUpdate();
+                ResultSet generatedKeys = crearPs.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    servicioId = generatedKeys.getLong(1);
+                    System.out.println("Nuevo servicio creado con ID: " + servicioId);
+                } else {
+                    throw new RuntimeException("No se pudo crear el servicio");
+                }
+            }
+            
+            // Asociar el servicio al alojamiento
+            PreparedStatement asociarPs = conn.prepareStatement(
+                "INSERT IGNORE INTO alojamiento_servicios (alojamiento_id, servicio_id) VALUES (?, ?)"
+            );
+            asociarPs.setInt(1, alojamientoId.intValue()); // Convertir Long a int
+            asociarPs.setLong(2, servicioId);
+            
+            int rowsInserted = asociarPs.executeUpdate();
+            if (rowsInserted > 0) {
+                System.out.println("Servicio asociado correctamente");
+            } else {
+                System.out.println("El servicio ya estaba asociado al alojamiento");
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error al asociar servicio '" + nombreServicio + "': " + e.getMessage());
+            throw new RuntimeException("Error al asociar servicio: " + e.getMessage());
+        }
+    }
+
+    // Agregar un nuevo alojamiento (con propietario por email)
+    public String addAlojamiento(AlojamientoDTO alojamiento, String emailPropietario) {
+        try {
+            Long id = addAlojamientoConId(alojamiento, emailPropietario);
+            if (id != null) {
                 return "Alojamiento agregado correctamente";
             } else {
                 return "No se pudo agregar el alojamiento";
@@ -359,7 +485,20 @@ public class AlojamientoServices {
                 return "No tienes permisos para eliminar este alojamiento";
             }
 
-            // Proceder con la eliminación
+            // Eliminar primero las referencias en otras tablas
+            PreparedStatement deleteImagenesPs = conn.prepareStatement("DELETE FROM imagenes_alojamiento WHERE alojamiento_id = ?");
+            deleteImagenesPs.setLong(1, id);
+            deleteImagenesPs.executeUpdate();
+
+            PreparedStatement deleteServiciosPs = conn.prepareStatement("DELETE FROM alojamiento_servicios WHERE alojamiento_id = ?");
+            deleteServiciosPs.setLong(1, id);
+            deleteServiciosPs.executeUpdate();
+
+            PreparedStatement deleteValoracionesPs = conn.prepareStatement("DELETE FROM valoraciones WHERE alojamiento_id = ?");
+            deleteValoracionesPs.setLong(1, id);
+            deleteValoracionesPs.executeUpdate();
+
+            // Proceder con la eliminación del alojamiento
             PreparedStatement ps = conn.prepareStatement("DELETE FROM alojamientos WHERE id = ?");
             ps.setLong(1, id);
             int rows = ps.executeUpdate();
@@ -411,6 +550,20 @@ public class AlojamientoServices {
     @Deprecated
     public String deleteAlojamiento(Long id) {
         try (Connection conn = DriverManager.getConnection(databaseUrl, "usuario", "usuario")) {
+            // Eliminar primero las referencias en otras tablas
+            PreparedStatement deleteImagenesPs = conn.prepareStatement("DELETE FROM imagenes_alojamiento WHERE alojamiento_id = ?");
+            deleteImagenesPs.setLong(1, id);
+            deleteImagenesPs.executeUpdate();
+
+            PreparedStatement deleteServiciosPs = conn.prepareStatement("DELETE FROM alojamiento_servicios WHERE alojamiento_id = ?");
+            deleteServiciosPs.setLong(1, id);
+            deleteServiciosPs.executeUpdate();
+
+            PreparedStatement deleteValoracionesPs = conn.prepareStatement("DELETE FROM valoraciones WHERE alojamiento_id = ?");
+            deleteValoracionesPs.setLong(1, id);
+            deleteValoracionesPs.executeUpdate();
+
+            // Eliminar el alojamiento
             PreparedStatement ps = conn.prepareStatement("DELETE FROM alojamientos WHERE id = ?");
             ps.setLong(1, id);
             int rows = ps.executeUpdate();

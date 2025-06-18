@@ -62,6 +62,11 @@ public class MainController {
         return "redirect:/login.html";
     }
 
+    @GetMapping("crear-alojamiento")
+    public String crearAlojamientoPage() {
+        return "crear-alojamiento";
+    }
+
     @GetMapping("profile")
     public String profilePage(@RequestParam(required = false) String email, Model model) {
         try {

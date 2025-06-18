@@ -169,92 +169,42 @@
         </div>
     </footer>
 
-    <!-- Modal para publicar alojamiento -->
-    <div id="modalAlojamiento">
-        <div class="modal-contenido">
-            <span class="cerrar" id="cerrarModal">&times;</span>
-
-            <h1>Publicar nuevo alojamiento</h1>
-
-            <label for="titulo">Título</label>
-            <input type="text" id="titulo" name="titulo" required>
-
-            <label for="descripcion">Descripción</label>
-            <textarea id="descripcion" name="descripcion" rows="4" placeholder="Describe tu alojamiento..."></textarea>
-
-            <label for="tipo_alojamiento">Tipo de Alojamiento</label>
-            <select id="tipo_alojamiento" name="tipo_alojamiento" required>
-                <option value="">Seleccione</option>
-                <option value="Apartamento">Apartamento</option>
-                <option value="Casa">Casa</option>
-                <option value="Estudio">Estudio</option>
-            </select>
-
-            <label for="capacidad">Capacidad</label>
-            <input type="number" id="capacidad" name="capacidad" required>
-
-            <label for="habitaciones">Habitaciones</label>
-            <input type="number" id="habitaciones" name="habitaciones" required>
-
-            <label for="camas">Camas</label>
-            <input type="number" id="camas" name="camas" min=1 required>
-
-            <label for="banos">Baños</label>
-            <input type="number" id="banos" name="banos" min=1 required>
-
-            <label for="precio_noche">Precio por Noche (€)</label>
-            <input type="number" step="0.01" id="precio_noche" name="precio_noche" required>
-
-            <label for="direccion">Dirección</label>
-            <input type="text" id="direccion" name="direccion" required>
-
-            <label for="ciudad">Ciudad</label>
-            <input type="text" id="ciudad" name="ciudad" required>
-
-            <label for="pais">País</label>
-            <input type="text" id="pais" name="pais" required>
-
-            <label for="codigo_postal">Código Postal</label>
-            <input type="text" id="codigo_postal" name="codigo_postal">
-
-            <label>Servicios incluidos</label>
-            <div class="checkbox-group">
-                <label><input type="checkbox" name="wifi" value="1"> WiFi</label>
-                <label><input type="checkbox" name="cocina" value="1"> Cocina</label>
-                <label><input type="checkbox" name="estacionamiento" value="1"> Estacionamiento</label>
-                <label><input type="checkbox" name="piscina" value="1"> Piscina</label>
-            </div>
-
-            <label for="disponible">¿Disponible?</label>
-            <select id="disponible" name="disponible">
-                <option value="1" selected>Sí</option>
-                <option value="0">No</option>
-            </select>
-
-            <label for="imagen">Imagenes del alojamiento</label>
-            <input type="file" id="imagen" name="imagen" accept="image/*" multiple>
-
-            <button onclick="createAlojamiento()">Publicar Alojamiento</button>
-        </div>
-    </div>
-
     <script src="/js/main.js"></script>
-    <script src="/js/newAlojamiento.js"></script>
     <script>
         mostrarAlojamientos("todos", "none");
 
-        // Script para controlar el modal
-        const modal = document.getElementById("modalAlojamiento");
-        const btn = document.getElementById("abrirModal");
-        const span = document.getElementById("cerrarModal");
-
-        btn.onclick = () => modal.style.display = "block";
-        span.onclick = () => modal.style.display = "none";
-        window.onclick = (event) => {
-            if (event.target === modal) {
-            modal.style.display = "none";
+        // Actualizar el comportamiento del botón "Publicar Alojamiento"
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnPublicar = document.getElementById('abrirModal');
+            if (btnPublicar) {
+                btnPublicar.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Verificar si el usuario está logueado
+                    if (!sessionManager.checkSession()) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    
+                    // Redirigir a la nueva página de crear alojamiento
+                    window.location.href = '/crear-alojamiento';
+                });
             }
-        };
+
+            // Actualizar el comportamiento del perfil de usuario
+            const userProfile = document.querySelector('.user-profile');
+            if (userProfile) {
+                userProfile.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    if (!sessionManager.checkSession()) {
+                        window.location.href = '/login';
+                    } else {
+                        window.location.href = '/profile';
+                    }
+                });
+            }
+        });
 
         // Agregar funcionalidad de me gusta
         document.querySelectorAll('.like-button').forEach(button => {
@@ -397,33 +347,5 @@
         });
     </script>
     <script src="/js/session-manager.js"></script>
-    <script>
-        // Inicializar sesión al cargar la página principal
-        document.addEventListener('DOMContentLoaded', function() {
-            // El sessionManager ya se inicializa automáticamente
-            
-            // Actualizar el comportamiento del botón "Publicar Alojamiento"
-            const btnPublicar = document.getElementById('abrirModal');
-            if (btnPublicar) {
-                btnPublicar.addEventListener('click', function(e) {
-                    if (!sessionManager.checkSession()) {
-                        e.preventDefault();
-                        window.location.href = '/login';
-                    }
-                });
-            }
-
-            // Actualizar el comportamiento del perfil de usuario
-            const userProfile = document.querySelector('.user-profile');
-            if (userProfile) {
-                userProfile.addEventListener('click', function(e) {
-                    if (!sessionManager.checkSession()) {
-                        e.preventDefault();
-                        window.location.href = '/login';
-                    }
-                });
-            }
-        });
-    </script>
 </body>
 </html>
