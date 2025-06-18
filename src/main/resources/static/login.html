@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/login.css">
     <title>Iniciar sesión o registrarse</title>
 </head>
+
 <body>
     <div class="auth-container">
         <div class="logo">
@@ -27,13 +29,14 @@
                     <input type="email" id="login-email" name="email" required placeholder="ejemplo@email.com">
                     <div class="error-message" id="login-email-error"></div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="login-password">Contraseña</label>
-                    <input type="password" id="login-password" name="password" required placeholder="Ingresa tu contraseña">
+                    <input type="password" id="login-password" name="password" required
+                        placeholder="Ingresa tu contraseña">
                     <div class="error-message" id="login-password-error"></div>
                 </div>
-                
+
                 <button type="submit" class="submit-btn">Iniciar sesión</button>
             </form>
         </div>
@@ -53,19 +56,20 @@
                         <div class="error-message" id="register-lastname-error"></div>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="register-email">Correo electrónico</label>
                     <input type="email" id="register-email" name="email" required placeholder="tu@email.com">
                     <div class="error-message" id="register-email-error"></div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="register-password">Contraseña</label>
-                    <input type="password" id="register-password" name="password" required minlength="8" placeholder="Mínimo 8 caracteres">
+                    <input type="password" id="register-password" name="password" required minlength="8"
+                        placeholder="Mínimo 8 caracteres">
                     <div class="error-message" id="register-password-error"></div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="register-birthdate">Fecha de nacimiento</label>
                     <input type="date" id="register-birthdate" name="birthdate" required>
@@ -83,15 +87,15 @@
                     <textarea id="register-bio" name="bio" placeholder="Cuéntanos algo sobre ti..." rows="3"></textarea>
                     <div class="error-message" id="register-bio-error"></div>
                 </div>
-                
+
                 <button type="submit" class="submit-btn">Registrarse</button>
             </form>
 
             <div class="terms">
-                Al seleccionar Aceptar y continuar a continuación, acepto los 
-                <a href="#">Términos del Servicio</a>, los 
-                <a href="#">Términos del servicio de Pagos</a>, la 
-                <a href="#">Política de no discriminación</a> y reconozco la 
+                Al seleccionar Aceptar y continuar a continuación, acepto los
+                <a href="#">Términos del Servicio</a>, los
+                <a href="#">Términos del servicio de Pagos</a>, la
+                <a href="#">Política de no discriminación</a> y reconozco la
                 <a href="#">Política de Privacidad</a> de Airbnb.
             </div>
         </div>
@@ -105,7 +109,7 @@
         function switchTab(tab, event) {
             // Limpiar mensajes
             clearMessages();
-            
+
             // Cambiar pestañas activas
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('active');
@@ -117,7 +121,7 @@
                 form.classList.remove('active');
             });
             document.getElementById(tab + '-form').classList.add('active');
-            
+
             currentTab = tab;
         }
 
@@ -152,14 +156,16 @@
 
                 if (response.ok) {
                     const usuario = await response.json();
-                    
-                    // Guardar datos del usuario en localStorage
-                    localStorage.setItem('usuario', JSON.stringify(usuario));
+
+                    // CAMBIO IMPORTANTE: Solo guardar email y estado de login
+                    localStorage.setItem('userEmail', usuario.email);
                     localStorage.setItem('usuarioLogueado', 'true');
-                    
+
+                    console.log('Login exitoso para:', usuario.email);
+
                     // Mostrar mensaje de éxito
                     showSuccess('Inicio de sesión exitoso. Redirigiendo...');
-                    
+
                     // Redirigir después de 1.5 segundos
                     setTimeout(() => {
                         window.location.href = '/';
@@ -190,27 +196,27 @@
 
             // Validaciones
             let hasErrors = false;
-            
+
             if (formData.name.length < 2) {
                 showError('register-name-error', 'El nombre debe tener al menos 2 caracteres');
                 hasErrors = true;
             }
-            
+
             if (formData.lastname.length < 2) {
                 showError('register-lastname-error', 'El apellido debe tener al menos 2 caracteres');
                 hasErrors = true;
             }
-            
+
             if (!validateEmail(formData.email)) {
                 showError('register-email-error', 'Por favor ingresa un email válido');
                 hasErrors = true;
             }
-            
+
             if (formData.password.length < 8) {
                 showError('register-password-error', 'La contraseña debe tener al menos 8 caracteres');
                 hasErrors = true;
             }
-            
+
             // Validar edad
             if (!validateAge(formData.birthdate)) {
                 showError('register-birthdate-error', 'Debes tener al menos 18 años para registrarte');
@@ -243,12 +249,12 @@
 
                 if (response.ok) {
                     showSuccess('¡Registro exitoso! Ahora puedes iniciar sesión.');
-                    
+
                     // Cambiar a tab de login después de 2 segundos
                     setTimeout(() => {
                         const loginTab = document.querySelector('.tab-button');
                         switchTab('login', { target: loginTab });
-                        
+
                         // Pre-llenar el email en el formulario de login
                         document.getElementById('login-email').value = formData.email;
                     }, 2000);
@@ -274,16 +280,16 @@
         // Función para validar edad
         function validateAge(birthdate) {
             if (!birthdate) return false;
-            
+
             const birth = new Date(birthdate);
             const today = new Date();
             let age = today.getFullYear() - birth.getFullYear();
             const monthDiff = today.getMonth() - birth.getMonth();
-            
+
             if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
                 age--;
             }
-            
+
             return age >= 18;
         }
 
@@ -324,20 +330,21 @@
         }
 
         // Inicializar cuando se carga la página
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Establecer fecha máxima para el campo de nacimiento
             const today = new Date();
             const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
             const maxDateString = maxDate.toISOString().split('T')[0];
             document.getElementById('register-birthdate').max = maxDateString;
-            
+
             // Si ya hay un usuario logueado, redirigir
             if (localStorage.getItem('usuarioLogueado') === 'true') {
                 window.location.href = '/';
             }
-            
+
             console.log('Página cargada correctamente');
         });
     </script>
 </body>
+
 </html>
