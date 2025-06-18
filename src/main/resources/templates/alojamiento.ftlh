@@ -233,7 +233,7 @@
         
         const subject = 'Consulta sobre: ${(alojamiento.titulo)!"alojamiento"}';
         const body = 'Hola, estoy interesado en tu alojamiento y me gustaría hacer una consulta.';
-        const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        const mailtoLink = `mailto:${(alojamiento.propietario.email)!"Sin email"}`;
         
         try {
             window.location.href = mailtoLink;
