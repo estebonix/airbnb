@@ -9,7 +9,7 @@ class SessionManager {
     init() {
         // Verificar si hay una sesión activa al cargar cualquier página
         this.checkSession();
-        
+
         // Actualizar UI según el estado de la sesión
         this.updateUI();
     }
@@ -55,7 +55,7 @@ class SessionManager {
         localStorage.removeItem('userEmail');
         localStorage.removeItem('usuarioLogueado');
         this.updateUI();
-        
+
         // Redirigir al login si no estamos ya ahí
         if (!window.location.pathname.includes('login')) {
             window.location.href = '/login';

@@ -26,10 +26,10 @@ public class MainController {
 
     @Autowired
     private AlojamientoServices alojamientoServices;
-    
+
     @Autowired
     private ServicioServices servicioServices;
-    
+
     @Autowired
     private ValoracionesAlojamientoService valoracionesServices;
 
@@ -66,7 +66,6 @@ public class MainController {
     public String profilePage(@RequestParam(required = false) String email, Model model) {
         try {
             System.out.println("=== PROFILE: Iniciando carga de perfil ===");
-            
             // Si no viene email por parámetro, mostrar página con JavaScript para obtenerlo
             if (email == null || email.trim().isEmpty()) {
                 System.out.println("No hay email en parámetros, mostrando página con JS");
@@ -78,35 +77,38 @@ public class MainController {
             
             // Buscar usuario por email
             UsuarioDTO usuario = usuarioServices.getUsuarioPorEmail(email);
-            
+
             if (usuario == null) {
                 System.out.println("Usuario no encontrado para email: " + email);
                 model.addAttribute("error", "Usuario no encontrado");
                 model.addAttribute("needsEmailFromJS", true);
                 return "profile";
             }
-            
+
             System.out.println("Usuario encontrado: " + usuario.getNombre() + " " + usuario.getApellido());
-            
+
             // Pasar datos del usuario al template
             model.addAttribute("usuario", usuario);
-            
+
             // Nombre completo
             String nombreCompleto = "";
             if (usuario.getNombre() != null && !usuario.getNombre().trim().isEmpty()) {
                 nombreCompleto += usuario.getNombre();
             }
             if (usuario.getApellido() != null && !usuario.getApellido().trim().isEmpty()) {
-                if (!nombreCompleto.isEmpty()) nombreCompleto += " ";
+                if (!nombreCompleto.isEmpty()) {
+                    nombreCompleto += " ";
+                }
                 nombreCompleto += usuario.getApellido();
             }
-            if (nombreCompleto.isEmpty()) nombreCompleto = "Usuario";
-            
+            if (nombreCompleto.isEmpty()) {
+                nombreCompleto = "Usuario";
+            }
+
             model.addAttribute("nombreCompleto", nombreCompleto);
             model.addAttribute("email", usuario.getEmail());
             model.addAttribute("telefono", usuario.getTelefono());
             model.addAttribute("biografia", usuario.getBiografia());
-            
             // Formatear fecha de nacimiento
             if (usuario.getFechaNacimiento() != null) {
                 model.addAttribute("fechaNacimiento", usuario.getFechaNacimiento());
@@ -132,25 +134,35 @@ public class MainController {
             } else {
                 model.addAttribute("añoRegistro", "2024");
             }
-            
+
             // Calcular completitud del perfil
             int completitud = 0;
-            if (usuario.getNombre() != null && !usuario.getNombre().trim().isEmpty()) completitud += 20;
-            if (usuario.getApellido() != null && !usuario.getApellido().trim().isEmpty()) completitud += 20;
-            if (usuario.getEmail() != null && !usuario.getEmail().trim().isEmpty()) completitud += 20;
-            if (usuario.getTelefono() != null && !usuario.getTelefono().trim().isEmpty()) completitud += 20;
-            if (usuario.getBiografia() != null && !usuario.getBiografia().trim().isEmpty()) completitud += 20;
-            
+            if (usuario.getNombre() != null && !usuario.getNombre().trim().isEmpty()) {
+                completitud += 20;
+            }
+            if (usuario.getApellido() != null && !usuario.getApellido().trim().isEmpty()) {
+                completitud += 20;
+            }
+            if (usuario.getEmail() != null && !usuario.getEmail().trim().isEmpty()) {
+                completitud += 20;
+            }
+            if (usuario.getTelefono() != null && !usuario.getTelefono().trim().isEmpty()) {
+                completitud += 20;
+            }
+            if (usuario.getBiografia() != null && !usuario.getBiografia().trim().isEmpty()) {
+                completitud += 20;
+            }
+
             model.addAttribute("completitudPerfil", completitud);
             model.addAttribute("needsEmailFromJS", false);
-            
+
             System.out.println("=== PROFILE: Datos cargados correctamente ===");
             System.out.println("- Nombre completo: " + nombreCompleto);
             System.out.println("- Email: " + usuario.getEmail());
             System.out.println("- Completitud: " + completitud + "%");
-            
+
             return "profile";
-            
+
         } catch (Exception e) {
             System.err.println("=== ERROR en profilePage ===");
             e.printStackTrace();

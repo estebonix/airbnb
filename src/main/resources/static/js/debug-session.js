@@ -39,7 +39,7 @@ console.log('Pathname:', window.location.pathname);
 console.log('\n3. Verificando elementos DOM...');
 const elementosImportantes = [
     'profile-name',
-    'nombre-completo', 
+    'nombre-completo',
     'email-usuario',
     'telefono-usuario',
     'biografia-usuario'
@@ -63,14 +63,14 @@ console.log('- limpiarSesion(): Limpia localStorage y redirige al login');
 console.log('- recargarPerfil(): Recarga los datos del perfil');
 console.log('- crearUsuarioTest(): Crea un usuario de prueba en localStorage');
 
-window.limpiarSesion = function() {
+window.limpiarSesion = function () {
     localStorage.removeItem('usuario');
     localStorage.removeItem('usuarioLogueado');
     console.log('Sesión limpiada');
     window.location.href = '/login';
 };
 
-window.recargarPerfil = function() {
+window.recargarPerfil = function () {
     if (typeof cargarDatosUsuario === 'function') {
         cargarDatosUsuario();
         console.log('Perfil recargado');
@@ -80,7 +80,7 @@ window.recargarPerfil = function() {
     }
 };
 
-window.crearUsuarioTest = function() {
+window.crearUsuarioTest = function () {
     const usuarioTest = {
         id: 999,
         nombre: "Usuario",
@@ -91,11 +91,11 @@ window.crearUsuarioTest = function() {
         fechaNacimiento: "1990-01-01",
         fecha_registro: new Date().toISOString()
     };
-    
+
     localStorage.setItem('usuario', JSON.stringify(usuarioTest));
     localStorage.setItem('usuarioLogueado', 'true');
     console.log('Usuario de prueba creado:', usuarioTest);
-    
+
     if (typeof cargarDatosUsuario === 'function') {
         cargarDatosUsuario();
     } else {
