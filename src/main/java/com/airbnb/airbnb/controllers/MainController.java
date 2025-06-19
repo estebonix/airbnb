@@ -1,8 +1,10 @@
 package com.airbnb.airbnb.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,15 +48,46 @@ public class MainController {
 
     @GetMapping("alojamiento/{id}/page")
     public String alojamientoPage(@PathVariable Long id, Model model) {
-        AlojamientoDTO alojamiento = alojamientoServices.getAlojamientoById(id);
-        model.addAttribute("alojamiento", alojamiento);
-        List<ServicioDTO> servicios = servicioServices.getServiciosByAlojamientoId2(id);
-        model.addAttribute("servicios", servicios);
-        Double valoracion = valoracionesServices.getValoracionMedia(id).getBody();
-        model.addAttribute("valoracion", valoracion);
-        List<ImagenDTO> imagenes = imagenesAlojamientoService.getImagenesByAlojamientoId(id);
-        model.addAttribute("imagenes", imagenes);
-        return "alojamiento";
+        try {
+            // Obtener alojamiento
+            AlojamientoDTO alojamiento = alojamientoServices.getAlojamientoById(id);
+            if (alojamiento == null) {
+                model.addAttribute("error", "Alojamiento no encontrado");
+                return "error";
+            }
+            model.addAttribute("alojamiento", alojamiento);
+            
+            // Obtener servicios
+            List<ServicioDTO> servicios = servicioServices.getServiciosByAlojamientoId2(id);
+            model.addAttribute("servicios", servicios != null ? servicios : new ArrayList<>());
+            
+            // Obtener valoración
+            try {
+                ResponseEntity<Double> valoracionResponse = valoracionesServices.getValoracionMedia(id);
+                Double valoracion = valoracionResponse.getBody();
+                model.addAttribute("valoracion", valoracion != null ? valoracion : 0.0);
+            } catch (Exception e) {
+                System.err.println("Error al obtener valoración: " + e.getMessage());
+                model.addAttribute("valoracion", 0.0);
+            }
+            
+            // Obtener imágenes
+            try {
+                List<ImagenDTO> imagenes = imagenesAlojamientoService.getImagenesByAlojamientoId(id);
+                model.addAttribute("imagenes", imagenes != null ? imagenes : new ArrayList<>());
+            } catch (Exception e) {
+                System.err.println("Error al obtener imágenes: " + e.getMessage());
+                model.addAttribute("imagenes", new ArrayList<>());
+            }
+            
+            return "alojamiento";
+            
+        } catch (Exception e) {
+            System.err.println("Error en alojamientoPage: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("error", "Error al cargar el alojamiento: " + e.getMessage());
+            return "error";
+        }
     }
 
     @GetMapping("login")

@@ -390,7 +390,14 @@
             });
         }
 
-        // FUNCIONES DE EDICIÓN
+        // VERSIÓN OPTIMIZADA DEL MODAL DE EDICIÓN - Reemplazar en alojamiento.ftlh
+
+        // Variables globales optimizadas
+        var currentAlojamiento = null;
+        var editModal = null;
+        var isModalOpen = false;
+
+        // FUNCIONES DE EDICIÓN OPTIMIZADAS
         function editarAlojamiento(alojamientoId) {
             console.log('Editando alojamiento:', alojamientoId);
             
@@ -399,6 +406,9 @@
                 alert('Debes estar logueado para editar un alojamiento');
                 return;
             }
+
+            // Mostrar loading
+            showLoadingSpinner('Cargando datos del alojamiento...');
 
             fetch('/alojamiento/' + alojamientoId)
                 .then(function(response) {
@@ -411,230 +421,367 @@
                     currentAlojamiento = data;
                     
                     if (!currentAlojamiento.propietario || currentAlojamiento.propietario.email !== userEmail) {
-                        alert('No tienes permisos para editar este alojamiento');
-                        return;
+                        throw new Error('No tienes permisos para editar este alojamiento');
                     }
 
-                    createEditModal();
+                    hideLoadingSpinner();
+                    createOptimizedEditModal();
                     populateEditForm();
                     showEditModal();
                 })
                 .catch(function(error) {
+                    hideLoadingSpinner();
                     console.error('Error al cargar datos del alojamiento:', error);
-                    alert('Error al cargar los datos del alojamiento: ' + error.message);
+                    alert('Error: ' + error.message);
                 });
         }
 
-        function createEditModal() {
-            var modal = document.getElementById('editAlojamientoModal');
-            if (modal) {
-                modal.remove();
+        function createOptimizedEditModal() {
+            // Eliminar modal existente si existe
+            if (editModal) {
+                editModal.remove();
+                editModal = null;
             }
 
-            modal = document.createElement('div');
-            modal.id = 'editAlojamientoModal';
-            modal.className = 'modal';
-            modal.style.display = 'none';
+            editModal = document.createElement('div');
+            editModal.id = 'editAlojamientoModal';
+            editModal.className = 'modal';
+            editModal.style.display = 'none';
 
-            modal.innerHTML = '<div class="modal-content">' +
-                '<div class="modal-header">' +
-                    '<h2>✏️ Editar Alojamiento</h2>' +
-                    '<span class="close" onclick="closeEditModal()" title="Cerrar">&times;</span>' +
-                '</div>' +
-                '<form id="editAlojamientoForm" class="edit-form">' +
-                    '<div class="form-section">' +
-                        '<h3>Información Básica</h3>' +
-                        '<div class="form-group">' +
-                            '<label for="edit-titulo" class="form-label">Título *</label>' +
-                            '<input type="text" id="edit-titulo" name="titulo" required class="form-input">' +
-                        '</div>' +
-                        '<div class="form-group">' +
-                            '<label for="edit-descripcion" class="form-label">Descripción *</label>' +
-                            '<textarea id="edit-descripcion" name="descripcion" required class="form-input" rows="4"></textarea>' +
-                        '</div>' +
-                        '<div class="form-row">' +
-                            '<div class="form-group">' +
-                                '<label for="edit-tipo" class="form-label">Tipo de Alojamiento *</label>' +
-                                '<select id="edit-tipo" name="tipoAlojamiento" required class="form-input">' +
-                                    '<option value="">Seleccione</option>' +
-                                    '<option value="Apartamento">Apartamento</option>' +
-                                    '<option value="Casa">Casa</option>' +
-                                    '<option value="Estudio">Estudio</option>' +
-                                    '<option value="Villa">Villa</option>' +
-                                    '<option value="Loft">Loft</option>' +
-                                '</select>' +
-                            '</div>' +
-                            '<div class="form-group">' +
-                                '<label for="edit-capacidad" class="form-label">Capacidad *</label>' +
-                                '<input type="number" id="edit-capacidad" name="capacidad" required min="1" max="20" class="form-input">' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="form-section">' +
-                        '<h3>Detalles del Espacio</h3>' +
-                        '<div class="form-row">' +
-                            '<div class="form-group">' +
-                                '<label for="edit-habitaciones" class="form-label">Habitaciones *</label>' +
-                                '<input type="number" id="edit-habitaciones" name="habitaciones" required min="0" max="10" class="form-input">' +
-                            '</div>' +
-                            '<div class="form-group">' +
-                                '<label for="edit-camas" class="form-label">Camas *</label>' +
-                                '<input type="number" id="edit-camas" name="camas" required min="1" max="20" class="form-input">' +
-                            '</div>' +
-                        '</div>' +
-                        '<div class="form-row">' +
-                            '<div class="form-group">' +
-                                '<label for="edit-banos" class="form-label">Baños *</label>' +
-                                '<input type="number" id="edit-banos" name="banos" required min="1" max="10" step="0.5" class="form-input">' +
-                            '</div>' +
-                            '<div class="form-group">' +
-                                '<label for="edit-precio" class="form-label">Precio por Noche (€) *</label>' +
-                                '<input type="number" id="edit-precio" name="precioNoche" required min="1" step="0.01" class="form-input">' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="form-section">' +
-                        '<h3>Ubicación</h3>' +
-                        '<div class="form-group">' +
-                            '<label for="edit-direccion" class="form-label">Dirección *</label>' +
-                            '<input type="text" id="edit-direccion" name="direccion" required class="form-input">' +
-                        '</div>' +
-                        '<div class="form-group">' +
-                            '<label for="edit-direccion-desc" class="form-label">Descripción de la Dirección</label>' +
-                            '<input type="text" id="edit-direccion-desc" name="direccionDescripcion" class="form-input">' +
-                        '</div>' +
-                        '<div class="form-row">' +
-                            '<div class="form-group">' +
-                                '<label for="edit-ciudad" class="form-label">Ciudad *</label>' +
-                                '<input type="text" id="edit-ciudad" name="ciudad" required class="form-input">' +
-                            '</div>' +
-                            '<div class="form-group">' +
-                                '<label for="edit-pais" class="form-label">País *</label>' +
-                                '<input type="text" id="edit-pais" name="pais" required class="form-input">' +
-                            '</div>' +
-                        '</div>' +
-                        '<div class="form-group">' +
-                            '<label for="edit-codigo-postal" class="form-label">Código Postal</label>' +
-                            '<input type="text" id="edit-codigo-postal" name="codigoPostal" class="form-input">' +
-                        '</div>' +
-                    '</div>' +
-                '</form>' +
-                '<div class="modal-footer">' +
-                    '<button type="button" class="cancel-btn" onclick="closeEditModal()">Cancelar</button>' +
-                    '<button type="button" class="save-btn" onclick="saveAlojamientoChanges()">Guardar Cambios</button>' +
-                '</div>' +
-            '</div>';
+            // HTML del modal optimizado
+            editModal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>✏️ Editar Alojamiento</h2>
+                        <span class="close" onclick="closeEditModal()" title="Cerrar">&times;</span>
+                    </div>
+                    
+                    <form id="editAlojamientoForm" class="edit-form" onsubmit="handleFormSubmit(event)">
+                        <!-- Información Básica -->
+                        <div class="form-section">
+                            <h3>📝 Información Básica</h3>
+                            <div class="form-group">
+                                <label for="edit-titulo" class="form-label">Título</label>
+                                <input type="text" id="edit-titulo" name="titulo" required class="form-input" 
+                                    maxlength="100" placeholder="Título del alojamiento">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-descripcion" class="form-label">Descripción</label>
+                                <textarea id="edit-descripcion" name="descripcion" required class="form-input" 
+                                        rows="4" maxlength="1000" placeholder="Describe tu alojamiento..."></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="edit-tipo" class="form-label">Tipo de Alojamiento</label>
+                                    <select id="edit-tipo" name="tipoAlojamiento" required class="form-input">
+                                        <option value="">Seleccione un tipo</option>
+                                        <option value="Apartamento">Apartamento</option>
+                                        <option value="Casa">Casa</option>
+                                        <option value="Estudio">Estudio</option>
+                                        <option value="Villa">Villa</option>
+                                        <option value="Loft">Loft</option>
+                                        <option value="Cabaña">Cabaña</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-precio" class="form-label">Precio por Noche (€)</label>
+                                    <input type="number" id="edit-precio" name="precioNoche" required 
+                                        min="1" max="10000" step="0.01" class="form-input" placeholder="50.00">
+                                </div>
+                            </div>
+                        </div>
 
-            document.body.appendChild(modal);
+                        <!-- Detalles del Espacio -->
+                        <div class="form-section">
+                            <h3>🏠 Detalles del Espacio</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="edit-capacidad" class="form-label">Capacidad</label>
+                                    <input type="number" id="edit-capacidad" name="capacidad" required 
+                                        min="1" max="20" class="form-input" placeholder="4">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-habitaciones" class="form-label">Habitaciones</label>
+                                    <input type="number" id="edit-habitaciones" name="habitaciones" required 
+                                        min="0" max="10" class="form-input" placeholder="2">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="edit-camas" class="form-label">Camas</label>
+                                    <input type="number" id="edit-camas" name="camas" required 
+                                        min="1" max="20" class="form-input" placeholder="2">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-banos" class="form-label">Baños</label>
+                                    <input type="number" id="edit-banos" name="banos" required 
+                                        min="1" max="10" step="0.5" class="form-input" placeholder="1">
+                                </div>
+                            </div>
+                        </div>
 
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
+                        <!-- Ubicación -->
+                        <div class="form-section">
+                            <h3>📍 Ubicación</h3>
+                            <div class="form-group">
+                                <label for="edit-direccion" class="form-label">Dirección</label>
+                                <input type="text" id="edit-direccion" name="direccion" required class="form-input" 
+                                    maxlength="200" placeholder="Calle, número, piso...">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-direccion-desc" class="form-label">Descripción de la Dirección (Opcional)</label>
+                                <input type="text" id="edit-direccion-desc" name="direccionDescripcion" class="form-input" 
+                                    maxlength="300" placeholder="Indicaciones adicionales...">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="edit-ciudad" class="form-label">Ciudad</label>
+                                    <input type="text" id="edit-ciudad" name="ciudad" required class="form-input" 
+                                        maxlength="100" placeholder="Madrid">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-pais" class="form-label">País</label>
+                                    <input type="text" id="edit-pais" name="pais" required class="form-input" 
+                                        maxlength="100" placeholder="España">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-codigo-postal" class="form-label">Código Postal (Opcional)</label>
+                                <input type="text" id="edit-codigo-postal" name="codigoPostal" class="form-input" 
+                                    maxlength="10" placeholder="28001">
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="cancel-btn" onclick="closeEditModal()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="button" class="save-btn" onclick="saveAlojamientoChanges()">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(editModal);
+
+            // Event listeners optimizados
+            setupModalEventListeners();
+        }
+
+        function setupModalEventListeners() {
+            // Cerrar modal al hacer clic en el fondo
+            editModal.addEventListener('click', function(e) {
+                if (e.target === editModal) {
                     closeEditModal();
                 }
             });
 
-            modal.querySelector('.modal-content').addEventListener('click', function(e) {
+            // Prevenir cierre al hacer clic en el contenido
+            var modalContent = editModal.querySelector('.modal-content');
+            modalContent.addEventListener('click', function(e) {
                 e.stopPropagation();
+            });
+
+            // Validación en tiempo real (debounced)
+            var inputs = editModal.querySelectorAll('input, textarea, select');
+            inputs.forEach(function(input) {
+                input.addEventListener('input', debounceValidation);
+                input.addEventListener('blur', function() {
+                    validateField(this);
+                });
             });
         }
 
         function populateEditForm() {
-            if (!currentAlojamiento) return;
+            if (!currentAlojamiento) {
+                console.error('No hay datos del alojamiento para poblar el formulario');
+                return;
+            }
 
-            document.getElementById('edit-titulo').value = currentAlojamiento.titulo || '';
-            document.getElementById('edit-descripcion').value = currentAlojamiento.descripcion || '';
-            document.getElementById('edit-tipo').value = currentAlojamiento.tipoAlojamiento || '';
-            document.getElementById('edit-capacidad').value = currentAlojamiento.capacidad || '';
-            document.getElementById('edit-habitaciones').value = currentAlojamiento.habitaciones || '';
-            document.getElementById('edit-camas').value = currentAlojamiento.camas || '';
-            document.getElementById('edit-banos').value = currentAlojamiento.banos || '';
-            document.getElementById('edit-precio').value = currentAlojamiento.precioNoche || '';
-            document.getElementById('edit-direccion').value = currentAlojamiento.direccion || '';
-            document.getElementById('edit-direccion-desc').value = currentAlojamiento.direccionDescripcion || '';
-            document.getElementById('edit-ciudad').value = currentAlojamiento.ciudad || '';
-            document.getElementById('edit-pais').value = currentAlojamiento.pais || '';
-            document.getElementById('edit-codigo-postal').value = currentAlojamiento.codigoPostal || '';
+            try {
+                // Poblar campos de forma segura
+                setFieldValue('edit-titulo', currentAlojamiento.titulo);
+                setFieldValue('edit-descripcion', currentAlojamiento.descripcion);
+                setFieldValue('edit-tipo', currentAlojamiento.tipoAlojamiento);
+                setFieldValue('edit-capacidad', currentAlojamiento.capacidad);
+                setFieldValue('edit-habitaciones', currentAlojamiento.habitaciones);
+                setFieldValue('edit-camas', currentAlojamiento.camas);
+                setFieldValue('edit-banos', currentAlojamiento.banos);
+                setFieldValue('edit-precio', currentAlojamiento.precioNoche);
+                setFieldValue('edit-direccion', currentAlojamiento.direccion);
+                setFieldValue('edit-direccion-desc', currentAlojamiento.direccionDescripcion);
+                setFieldValue('edit-ciudad', currentAlojamiento.ciudad);
+                setFieldValue('edit-pais', currentAlojamiento.pais);
+                setFieldValue('edit-codigo-postal', currentAlojamiento.codigoPostal);
+
+                console.log('Formulario poblado correctamente');
+            } catch (error) {
+                console.error('Error al poblar el formulario:', error);
+                alert('Error al cargar los datos en el formulario');
+            }
+        }
+
+        function setFieldValue(fieldId, value) {
+            var field = document.getElementById(fieldId);
+            if (field && value !== undefined && value !== null) {
+                field.value = value;
+            }
         }
 
         function showEditModal() {
-            var modal = document.getElementById('editAlojamientoModal');
-            if (modal) {
-                modal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
+            if (!editModal) {
+                console.error('Modal no existe');
+                return;
             }
+
+            editModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            isModalOpen = true;
+
+            // Animar entrada
+            requestAnimationFrame(function() {
+                editModal.style.opacity = '1';
+            });
+
+            // Foco en el primer campo
+            setTimeout(function() {
+                var firstInput = editModal.querySelector('#edit-titulo');
+                if (firstInput) {
+                    firstInput.focus();
+                }
+            }, 300);
         }
 
         function closeEditModal() {
-            var modal = document.getElementById('editAlojamientoModal');
-            if (modal) {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
+            if (!editModal || !isModalOpen) return;
+
+            // Verificar si hay cambios sin guardar
+            if (hasUnsavedChanges() && !confirm('¿Estás seguro de cerrar? Los cambios no guardados se perderán.')) {
+                return;
             }
+
+            editModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            isModalOpen = false;
             currentAlojamiento = null;
+
+            // Limpiar el modal después de un delay
+            setTimeout(function() {
+                if (editModal && editModal.parentNode) {
+                    editModal.parentNode.removeChild(editModal);
+                    editModal = null;
+                }
+            }, 300);
         }
 
-        function validateEditForm() {
-            var requiredFields = [
-                'edit-titulo', 'edit-descripcion', 'edit-tipo', 'edit-capacidad',
-                'edit-habitaciones', 'edit-camas', 'edit-banos', 'edit-precio',
-                'edit-direccion', 'edit-ciudad', 'edit-pais'
-            ];
+        function hasUnsavedChanges() {
+            if (!currentAlojamiento || !editModal) return false;
 
+            var currentValues = gatherFormData();
+            
+            // Comparar valores importantes
+            return (
+                currentValues.titulo !== currentAlojamiento.titulo ||
+                currentValues.descripcion !== currentAlojamiento.descripcion ||
+                currentValues.precioNoche !== currentAlojamiento.precioNoche ||
+                currentValues.capacidad !== currentAlojamiento.capacidad
+            );
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            saveAlojamientoChanges();
+        }
+
+        // Validación optimizada
+        var validationTimeout;
+        function debounceValidation() {
+            clearTimeout(validationTimeout);
+            validationTimeout = setTimeout(function() {
+                validateForm();
+            }, 500);
+        }
+
+        function validateField(field) {
+            var value = field.value.trim();
+            var isValid = true;
+
+            // Limpiar estados anteriores
+            field.classList.remove('error', 'success');
+
+            // Validaciones específicas
+            switch (field.id) {
+                case 'edit-titulo':
+                    isValid = value.length >= 5 && value.length <= 100;
+                    break;
+                case 'edit-descripcion':
+                    isValid = value.length >= 20 && value.length <= 1000;
+                    break;
+                case 'edit-precio':
+                    var precio = parseFloat(value);
+                    isValid = precio > 0 && precio <= 10000;
+                    break;
+                case 'edit-capacidad':
+                case 'edit-habitaciones':
+                case 'edit-camas':
+                case 'edit-banos':
+                    var num = parseFloat(value);
+                    isValid = num > 0 && num <= 20;
+                    break;
+                default:
+                    isValid = field.hasAttribute('required') ? value.length > 0 : true;
+            }
+
+            // Aplicar clase de estado
+            if (field.hasAttribute('required') || value.length > 0) {
+                field.classList.add(isValid ? 'success' : 'error');
+            }
+
+            return isValid;
+        }
+
+        function validateForm() {
+            var form = document.getElementById('editAlojamientoForm');
+            if (!form) return false;
+
+            var inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
             var isValid = true;
             var errors = [];
 
-            for (var i = 0; i < requiredFields.length; i++) {
-                var field = document.getElementById(requiredFields[i]);
-                if (!field || !field.value.trim()) {
+            inputs.forEach(function(input) {
+                if (!validateField(input)) {
                     isValid = false;
-                    errors.push('El campo ' + requiredFields[i].replace('edit-', '') + ' es requerido');
-                    if (field) {
-                        field.style.borderColor = '#dc3545';
-                    }
-                } else if (field) {
-                    field.style.borderColor = '';
+                    errors.push(input.previousElementSibling.textContent + ' no es válido');
                 }
-            }
+            });
 
+            // Validaciones adicionales
             var capacidad = parseInt(document.getElementById('edit-capacidad').value);
             var habitaciones = parseInt(document.getElementById('edit-habitaciones').value);
             var camas = parseInt(document.getElementById('edit-camas').value);
-            var banos = parseFloat(document.getElementById('edit-banos').value);
-            var precio = parseFloat(document.getElementById('edit-precio').value);
 
-            if (capacidad < 1 || capacidad > 20) {
+            if (capacidad < camas) {
                 isValid = false;
-                errors.push('La capacidad debe estar entre 1 y 20 personas');
+                errors.push('La capacidad no puede ser menor que el número de camas');
             }
 
-            if (habitaciones < 0 || habitaciones > 10) {
-                isValid = false;
-                errors.push('Las habitaciones deben estar entre 0 y 10');
-            }
-
-            if (camas < 1 || camas > 20) {
-                isValid = false;
-                errors.push('Las camas deben estar entre 1 y 20');
-            }
-
-            if (banos < 1 || banos > 10) {
-                isValid = false;
-                errors.push('Los baños deben estar entre 1 y 10');
-            }
-
-            if (precio <= 0) {
-                isValid = false;
-                errors.push('El precio debe ser mayor a 0');
-            }
-
-            if (!isValid) {
-                alert('Errores en el formulario:\\n' + errors.join('\\n'));
+            // Actualizar botón de guardar
+            var saveBtn = document.querySelector('.save-btn');
+            if (saveBtn) {
+                saveBtn.disabled = !isValid;
             }
 
             return isValid;
         }
 
         function gatherFormData() {
+            if (!currentAlojamiento) {
+                console.error('No hay datos del alojamiento actual');
+                return null;
+            }
+
             return {
                 id: currentAlojamiento.id,
                 titulo: document.getElementById('edit-titulo').value.trim(),
@@ -646,19 +793,20 @@
                 banos: parseFloat(document.getElementById('edit-banos').value),
                 precioNoche: parseFloat(document.getElementById('edit-precio').value),
                 direccion: document.getElementById('edit-direccion').value.trim(),
-                direccionDescripcion: document.getElementById('edit-direccion-desc').value.trim(),
+                direccionDescripcion: document.getElementById('edit-direccion-desc').value.trim() || null,
                 ciudad: document.getElementById('edit-ciudad').value.trim(),
                 pais: document.getElementById('edit-pais').value.trim(),
-                codigoPostal: document.getElementById('edit-codigo-postal').value.trim(),
+                codigoPostal: document.getElementById('edit-codigo-postal').value.trim() || null,
                 propietario: currentAlojamiento.propietario,
                 fechaRegistro: currentAlojamiento.fechaRegistro
             };
         }
 
         function saveAlojamientoChanges() {
-            console.log('Guardando cambios del alojamiento...');
+            console.log('Iniciando guardado de cambios...');
 
-            if (!validateEditForm()) {
+            if (!validateForm()) {
+                alert('Por favor corrige los errores en el formulario antes de continuar');
                 return;
             }
 
@@ -669,11 +817,17 @@
             }
 
             var formData = gatherFormData();
-            
+            if (!formData) {
+                alert('Error al recopilar los datos del formulario');
+                return;
+            }
+
             var saveBtn = document.querySelector('.save-btn');
-            var originalText = saveBtn.textContent;
+            var originalHTML = saveBtn.innerHTML;
+            
+            // Estado de carga
             saveBtn.disabled = true;
-            saveBtn.textContent = 'Guardando...';
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
             fetch('/alojamiento/update/' + currentAlojamiento.id + '?emailPropietario=' + encodeURIComponent(userEmail), {
                 method: 'PUT',
@@ -683,15 +837,27 @@
                 body: JSON.stringify(formData)
             })
             .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Error del servidor: ' + response.status);
+                }
                 return response.text();
             })
             .then(function(result) {
+                console.log('Respuesta del servidor:', result);
+                
                 if (result.indexOf('correctamente') !== -1) {
-                    alert('Alojamiento actualizado correctamente');
-                    closeEditModal();
+                    // Éxito
+                    saveBtn.innerHTML = '<i class="fas fa-check"></i> Guardado';
+                    saveBtn.style.background = 'linear-gradient(135deg, #51cf66 0%, #40c057 100%)';
                     
                     setTimeout(function() {
-                        window.location.reload();
+                        closeEditModal();
+                        showSuccessMessage('Alojamiento actualizado correctamente');
+                        
+                        // Recargar página después de un momento
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1500);
                     }, 1000);
                 } else {
                     throw new Error(result);
@@ -699,21 +865,98 @@
             })
             .catch(function(error) {
                 console.error('Error al actualizar alojamiento:', error);
+                
+                saveBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                saveBtn.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)';
+                
                 alert('Error al actualizar el alojamiento: ' + error.message);
-            })
-            .finally(function() {
-                saveBtn.disabled = false;
-                saveBtn.textContent = originalText;
+                
+                // Restaurar botón después de 3 segundos
+                setTimeout(function() {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalHTML;
+                    saveBtn.style.background = '';
+                }, 3000);
             });
         }
 
-        // Event listener para teclas
+        // Funciones de utilidad
+        function showLoadingSpinner(message) {
+            var spinner = document.createElement('div');
+            spinner.id = 'loading-spinner';
+            spinner.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10001;
+                backdrop-filter: blur(5px);
+            `;
+            
+            spinner.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <div style="font-size: 2rem; margin-bottom: 15px;">
+                        <i class="fas fa-spinner fa-spin" style="color: #667eea;"></i>
+                    </div>
+                    <div style="color: #333; font-weight: 600;">${message!"Error desconocido"}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(spinner);
+        }
+
+        function hideLoadingSpinner() {
+            var spinner = document.getElementById('loading-spinner');
+            if (spinner) {
+                spinner.remove();
+            }
+        }
+
+        function showSuccessMessage(message) {
+            var notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 15px;
+                z-index: 10002;
+                font-weight: 600;
+                box-shadow: 0 8px 25px rgba(81, 207, 102, 0.3);
+                transform: translateX(120%);
+                transition: transform 0.4s ease;
+            `;
+            
+            notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(120%)';
+                setTimeout(() => notification.remove(), 400);
+            }, 3000);
+        }
+
+        // Event listeners globales
         document.addEventListener('keydown', function(e) {
-            var modal = document.getElementById('editAlojamientoModal');
-            if (modal && modal.style.display === 'block') {
-                if (e.key === 'Escape') {
-                    closeEditModal();
-                }
+            if (isModalOpen && e.key === 'Escape') {
+                closeEditModal();
+            }
+        });
+
+        // Prevenir cierre accidental de la página con cambios sin guardar
+        window.addEventListener('beforeunload', function(e) {
+            if (isModalOpen && hasUnsavedChanges()) {
+                e.preventDefault();
+                e.returnValue = '';
             }
         });
     </script>
