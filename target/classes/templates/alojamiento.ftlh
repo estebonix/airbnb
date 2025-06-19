@@ -66,7 +66,7 @@
                         </div>
                     </div>
                 </section>
-
+                <br>
                 <!-- Seccion del anfitrion -->
                 <section class="host-section">
                     <h3>Acerca del anfitrión</h3>
@@ -134,7 +134,7 @@
                         </div>
                     </#if>
                 </section>
-
+                <br>
                 <!-- Servicios -->
                 <section class="amenities">
                     <h3>¿Qué ofrece este lugar?</h3>
