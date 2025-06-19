@@ -1479,8 +1479,6 @@
                     
                     if (typeof sessionManager === 'undefined' || !sessionManager.checkSession()) {
                         window.location.href = '/login';
-                    } else {
-                        window.location.href = '/profile';
                     }
                 });
             }
