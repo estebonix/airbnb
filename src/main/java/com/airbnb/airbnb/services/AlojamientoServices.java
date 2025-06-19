@@ -9,6 +9,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,9 @@ import com.airbnb.airbnb.dto.UsuarioDTO;
 
 @Service
 public class AlojamientoServices {
+
+    @Autowired
+    private DataSource dataSource;
 
     @Autowired
     private ServicioServices servicioServices;
@@ -100,7 +105,7 @@ public class AlojamientoServices {
 
     // Obtener un alojamiento por su id con información del propietario
     public AlojamientoDTO getAlojamientoById(Long id) {
-        try (Connection conn = DriverManager.getConnection(databaseUrl, "usuario", "usuario")) {
+        try (Connection conn = dataSource.getConnection()) {
             String query = """
                 SELECT 
                     a.id, a.titulo, a.descripcion, a.tipo_alojamiento, a.capacidad, 

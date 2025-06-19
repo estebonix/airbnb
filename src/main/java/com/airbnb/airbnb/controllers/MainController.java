@@ -3,6 +3,8 @@ package com.airbnb.airbnb.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,6 +27,8 @@ import com.airbnb.airbnb.services.ValoracionesAlojamientoService;
 @Controller
 @RequestMapping("/")
 public class MainController {
+
+    private static final Logger log = LoggerFactory.getLogger(MainController.class);
 
     @Autowired
     private AlojamientoServices alojamientoServices;
@@ -49,17 +53,27 @@ public class MainController {
     @GetMapping("alojamiento/{id}/page")
     public String alojamientoPage(@PathVariable Long id, Model model) {
         try {
+            log.info("Loading alojamiento page for id: {}", id);
+            
             // Obtener alojamiento
             AlojamientoDTO alojamiento = alojamientoServices.getAlojamientoById(id);
             if (alojamiento == null) {
+                log.warn("Alojamiento with id {} not found", id);
                 model.addAttribute("error", "Alojamiento no encontrado");
+                model.addAttribute("message", "El alojamiento que buscas no existe o ha sido eliminado");
+                model.addAttribute("statusCode", 404);
                 return "error";
             }
             model.addAttribute("alojamiento", alojamiento);
             
             // Obtener servicios
-            List<ServicioDTO> servicios = servicioServices.getServiciosByAlojamientoId2(id);
-            model.addAttribute("servicios", servicios != null ? servicios : new ArrayList<>());
+            try {
+                List<ServicioDTO> servicios = servicioServices.getServiciosByAlojamientoId2(id);
+                model.addAttribute("servicios", servicios != null ? servicios : new ArrayList<>());
+            } catch (Exception e) {
+                log.warn("Error getting servicios for alojamiento {}: {}", id, e.getMessage());
+                model.addAttribute("servicios", new ArrayList<>());
+            }
             
             // Obtener valoración
             try {
@@ -67,7 +81,7 @@ public class MainController {
                 Double valoracion = valoracionResponse.getBody();
                 model.addAttribute("valoracion", valoracion != null ? valoracion : 0.0);
             } catch (Exception e) {
-                System.err.println("Error al obtener valoración: " + e.getMessage());
+                log.warn("Error getting valoracion for alojamiento {}: {}", id, e.getMessage());
                 model.addAttribute("valoracion", 0.0);
             }
             
@@ -76,16 +90,21 @@ public class MainController {
                 List<ImagenDTO> imagenes = imagenesAlojamientoService.getImagenesByAlojamientoId(id);
                 model.addAttribute("imagenes", imagenes != null ? imagenes : new ArrayList<>());
             } catch (Exception e) {
-                System.err.println("Error al obtener imágenes: " + e.getMessage());
+                log.warn("Error getting images for alojamiento {}: {}", id, e.getMessage());
                 model.addAttribute("imagenes", new ArrayList<>());
             }
             
+            // Agregar mensaje vacío para evitar errores de template
+            model.addAttribute("message", "");
+            
+            log.info("Successfully loaded alojamiento page for id: {}", id);
             return "alojamiento";
             
         } catch (Exception e) {
-            System.err.println("Error en alojamientoPage: " + e.getMessage());
-            e.printStackTrace();
-            model.addAttribute("error", "Error al cargar el alojamiento: " + e.getMessage());
+            log.error("Error loading alojamiento page for id {}: ", id, e);
+            model.addAttribute("error", "Error interno del servidor");
+            model.addAttribute("message", "Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo más tarde.");
+            model.addAttribute("statusCode", 500);
             return "error";
         }
     }

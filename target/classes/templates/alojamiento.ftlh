@@ -903,7 +903,7 @@
                     <div style="font-size: 2rem; margin-bottom: 15px;">
                         <i class="fas fa-spinner fa-spin" style="color: #667eea;"></i>
                     </div>
-                    <div style="color: #333; font-weight: 600;">${message!"Error desconocido"}</div>
+                    <div style="color: #333; font-weight: 600;">${message!""}</div>
                 </div>
             `;
             
@@ -934,7 +934,7 @@
                 transition: transform 0.4s ease;
             `;
             
-            notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message!""}`;
             document.body.appendChild(notification);
             
             setTimeout(() => notification.style.transform = 'translateX(0)', 100);
