@@ -119,7 +119,7 @@
                     
                     <#if alojamiento.propietario?? && alojamiento.propietario.email??>
                         <div class="host-actions">
-                            <button class="contact-host-btn" onclick="contactarAnfitrion('${alojamiento.propietario.email}')">
+                            <button class="contact-host-btn">
                                 📩 Contactar anfitrión
                             </button>
                             
@@ -349,24 +349,6 @@
                 setTimeout(function() {
                     mainImage.style.opacity = '1';
                 }, 150);
-            }
-        }
-
-        function contactarAnfitrion(email) {
-            if (!email || email.trim() === '') {
-                alert('Email del anfitrión no disponible');
-                return;
-            }
-            
-            var subject = encodeURIComponent('Consulta sobre: ' + alojamientoData.titulo);
-            var body = encodeURIComponent('Hola, estoy interesado en tu alojamiento y me gustaría hacer una consulta.');
-            var mailtoLink = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
-            
-            try {
-                window.location.href = mailtoLink;
-            } catch (error) {
-                console.error('Error al abrir cliente de email:', error);
-                alert('No se pudo abrir el cliente de email. Email: ' + email);
             }
         }
 
