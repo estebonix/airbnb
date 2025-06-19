@@ -40,46 +40,21 @@ public class MainController {
     private UsuarioServices usuarioServices;
 
     @GetMapping
-    public String mainPage(Model model) {
-        // La página principal no necesita datos del servidor
-        // Los alojamientos se cargan dinámicamente con JavaScript
-        System.out.println("Cargando página principal");
+    public String mainPage() {
         return "index";
     }
 
     @GetMapping("alojamiento/{id}/page")
     public String alojamientoPage(@PathVariable Long id, Model model) {
-        try {
-            System.out.println("Cargando página de alojamiento ID: " + id);
-            
-            AlojamientoDTO alojamiento = alojamientoServices.getAlojamientoById(id);
-            if (alojamiento == null) {
-                System.err.println("Alojamiento no encontrado con ID: " + id);
-                return "error";
-            }
-            
-            model.addAttribute("alojamiento", alojamiento);
-            
-            // Cargar servicios
-            List<ServicioDTO> servicios = servicioServices.getServiciosByAlojamientoId2(id);
-            model.addAttribute("servicios", servicios);
-            
-            // Cargar valoración
-            Double valoracion = valoracionesServices.getValoracionMedia(id).getBody();
-            model.addAttribute("valoracion", valoracion != null ? valoracion : 0.0);
-            
-            // Cargar imágenes
-            List<ImagenDTO> imagenes = imagenesAlojamientoService.getImagenesByAlojamientoId(id);
-            model.addAttribute("imagenes", imagenes);
-            
-            System.out.println("Página de alojamiento cargada correctamente");
-            return "alojamiento";
-            
-        } catch (Exception e) {
-            System.err.println("Error al cargar página de alojamiento: " + e.getMessage());
-            e.printStackTrace();
-            return "error";
-        }
+        AlojamientoDTO alojamiento = alojamientoServices.getAlojamientoById(id);
+        model.addAttribute("alojamiento", alojamiento);
+        List<ServicioDTO> servicios = servicioServices.getServiciosByAlojamientoId2(id);
+        model.addAttribute("servicios", servicios);
+        Double valoracion = valoracionesServices.getValoracionMedia(id).getBody();
+        model.addAttribute("valoracion", valoracion);
+        List<ImagenDTO> imagenes = imagenesAlojamientoService.getImagenesByAlojamientoId(id);
+        model.addAttribute("imagenes", imagenes);
+        return "alojamiento";
     }
 
     @GetMapping("login")
@@ -88,8 +63,7 @@ public class MainController {
     }
 
     @GetMapping("crear-alojamiento")
-    public String crearAlojamientoPage(Model model) {
-        System.out.println("Cargando página de crear alojamiento");
+    public String crearAlojamientoPage() {
         return "crear-alojamiento";
     }
 
@@ -140,7 +114,6 @@ public class MainController {
             model.addAttribute("email", usuario.getEmail());
             model.addAttribute("telefono", usuario.getTelefono());
             model.addAttribute("biografia", usuario.getBiografia());
-            
             // Formatear fecha de nacimiento
             if (usuario.getFechaNacimiento() != null) {
                 model.addAttribute("fechaNacimiento", usuario.getFechaNacimiento());
@@ -202,5 +175,5 @@ public class MainController {
             model.addAttribute("needsEmailFromJS", true);
             return "profile";
         }
-    }
+    }   
 }

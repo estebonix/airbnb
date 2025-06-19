@@ -29,6 +29,7 @@
             
             <div class="user-menu">
                 <button id="abrirModal" class="btn-publicar become-host">Publicar Alojamiento</button>
+
                 <div class="globe-icon">
                     <i class="fas fa-globe"></i>
                 </div>
@@ -93,6 +94,42 @@
                 </div>
                 <div class="category-name">Piscinas</div>
             </div>
+            <div class="category">
+                <div class="category-icon">
+                    <i class="fas fa-hot-tub"></i>
+                </div>
+                <div class="category-name">Jacuzzi</div>
+            </div>
+            <div class="category">
+                <div class="category-icon">
+                    <i class="fas fa-wind"></i>
+                </div>
+                <div class="category-name">Aire Acondicionado</div>
+            </div>
+            <div class="category">
+                <div class="category-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="category-name">Calefacción</div>
+            </div>
+            <div class="category">
+                <div class="category-icon">
+                    <i class="fas fa-soap"></i>
+                </div>
+                <div class="category-name">Lavadora</div>
+            </div>
+            <div class="category">
+                <div class="category-icon">
+                    <i class="fas fa-tshirt"></i>
+                </div>
+                <div class="category-name">Secadora</div>
+            </div>
+            <div class="category">
+                <div class="category-icon">
+                    <i class="fas fa-tv"></i>
+                </div>
+                <div class="category-name">TV</div>
+            </div>
         </div>
         
         <button class="filters-button">
@@ -103,7 +140,7 @@
     
     <!-- Listings -->
     <div id="listings" class="listings">
-        <!-- Los alojamientos se cargarán aquí -->
+        <!-- Los alojamientos se generaran aquí -->
     </div>
     
     <!-- Footer -->
@@ -132,146 +169,183 @@
         </div>
     </footer>
 
+    <script src="/js/main.js"></script>
     <script>
-        // Funciones API básicas
-        async function getAlojamientos() {
-            try {
-                const response = await fetch("http://localhost:8080/alojamiento/getAll");
-                if (!response.ok) {
-                    throw new Error('Error en la respuesta de la API');
-                }
-                return await response.json();
-            } catch (error) {
-                console.error('Error al obtener alojamientos:', error);
-                return [];
-            }
-        }
+        mostrarAlojamientos("todos", "none");
 
-        async function getMainImage(alojamientoId) {
-            try {
-                const response = await fetch("http://localhost:8080/alojamiento/imagenes/mainImagen/" + alojamientoId);
-                if (!response.ok) {
-                    return '/img/default-property.jpg';
-                }
-                return await response.text();
-            } catch (error) {
-                console.error('Error al obtener imagen:', error);
-                return '/img/default-property.jpg';
-            }
-        }
-
-        async function getValoracionMedia(alojamientoId) {
-            try {
-                const response = await fetch("http://localhost:8080/alojamiento/valoraciones/media/" + alojamientoId);
-                if (!response.ok) {
-                    return 0;
-                }
-                const valoracion = await response.json();
-                return valoracion || 0;
-            } catch (error) {
-                console.error('Error al obtener valoración:', error);
-                return 0;
-            }
-        }
-
-        // Función para mostrar alojamientos
-        async function mostrarAlojamientos() {
-            const listings = document.getElementById('listings');
-            let alojamientos = await getAlojamientos();
-
-            console.log('Alojamientos obtenidos:', alojamientos.length);
-            listings.innerHTML = "";
-            
-            if (alojamientos.length > 0) {
-                for (const alojamiento of alojamientos) {
-                    try {
-                        let mainImageUrl = await getMainImage(alojamiento.id);
-                        let valoracionMedia = await getValoracionMedia(alojamiento.id);
-                        
-                        listings.innerHTML += `
-                            <div class="listing" onclick="window.location.href='/alojamiento/${alojamiento.id}/page'">
-                                <div class="listing-images">
-                                    <img src="${mainImageUrl}" alt="${alojamiento.titulo}" class="listing-image">
-                                    <button class="like-button">
-                                        <i class="far fa-heart"></i>
-                                    </button>
-                                </div>
-                                <div class="listing-info">
-                                    <div class="listing-location">
-                                        <div>${alojamiento.ciudad}, ${alojamiento.pais}</div>
-                                        <div class="listing-rating">
-                                            <i class="fas fa-star"></i>
-                                            <span>${valoracionMedia}</span>
-                                        </div>
-                                    </div>
-                                    <div class="listing-details">${alojamiento.titulo}</div>
-                                    <div class="listing-details">${alojamiento.capacidad} huéspedes · ${alojamiento.habitaciones} habitaciones</div>
-                                    <div class="listing-price"><span>${alojamiento.precioNoche}€</span> por noche</div>
-                                </div>
-                            </div>
-                        `;
-                    } catch (error) {
-                        console.error('Error al mostrar alojamiento:', error);
-                    }
-                }
-            } else {
-                listings.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">No se encontraron alojamientos</div>';
-            }
-        }
-
-        // Inicializar cuando se carga la página
+        // Actualizar el comportamiento del botón "Publicar Alojamiento"
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Página cargada, iniciando...');
-            mostrarAlojamientos();
-
-            // Configurar botón publicar
             const btnPublicar = document.getElementById('abrirModal');
             if (btnPublicar) {
                 btnPublicar.addEventListener('click', function(e) {
                     e.preventDefault();
+                    
+                    // Verificar si el usuario está logueado
+                    if (!sessionManager.checkSession()) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    
+                    // Redirigir a la nueva página de crear alojamiento
                     window.location.href = '/crear-alojamiento';
                 });
             }
 
-            // Configurar perfil de usuario
+            // Actualizar el comportamiento del perfil de usuario
             const userProfile = document.querySelector('.user-profile');
             if (userProfile) {
                 userProfile.addEventListener('click', function(e) {
                     e.preventDefault();
-                    window.location.href = '/profile';
+                    
+                    if (!sessionManager.checkSession()) {
+                        window.location.href = '/login';
+                    } else {
+                        window.location.href = '/profile';
+                    }
                 });
             }
+        });
 
-            // Funcionalidad básica de categorías
-            document.querySelectorAll('.category').forEach(category => {
-                category.addEventListener('click', function() {
-                    document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
-                    this.classList.add('active');
-                    mostrarAlojamientos(); // Por ahora muestra todos
-                });
-            });
-
-            // Funcionalidad de me gusta
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.like-button')) {
-                    e.stopPropagation();
-                    const button = e.target.closest('.like-button');
-                    const icon = button.querySelector('i');
-                    if (icon.classList.contains('far')) {
-                        icon.classList.remove('far');
-                        icon.classList.add('fas');
-                        icon.style.color = '#ff385c';
-                    } else {
-                        icon.classList.remove('fas');
-                        icon.classList.add('far');
-                        icon.style.color = '';
-                    }
+        // Agregar funcionalidad de me gusta
+        document.querySelectorAll('.like-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const icon = this.querySelector('i');
+                if (icon.classList.contains('far')) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    icon.style.color = '#ff385c';
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    icon.style.color = '';
                 }
             });
         });
+        
+        let tipo = [];
+        let servicio = [];
+        // Funcionalidad de categorías
+        document.querySelectorAll('.category').forEach(category => {
+            category.addEventListener('click', function() {
+                this.classList.toggle('active');
+                if(this.classList.contains('active')){
+                    const nombreCategoria = this.querySelector('.category-name').textContent.trim();
+                    const categoriaTodos = document.querySelector('#categoriaTodos');
+                    if (nombreCategoria !== 'Todos') {
+                        categoriaTodos.classList.remove('active');
+                        if(tipo.includes('todos')) {
+                            tipo = [];
+                        }
+                        if(servicio.includes('none')) {
+                            servicio = [];
+                        }
+                    }   
+                    switch (nombreCategoria) {
+                    case 'Todos':
+                        document.querySelectorAll('.category').forEach(c => { c.classList.remove('active') });
+                        this.classList.add('active');
+                        tipo = [];
+                        servicio = [];
+                        servicio.push('none');
+                        tipo.push('todos');
+                        break;
+                    case 'Casas':
+                        tipo.push('Casa');
+                        break;
+                    case 'Estudio':
+                        tipo.push('Estudio');
+                        break;
+                    case 'Apartamentos':
+                        tipo.push('Apartamento');
+                        break;
+                    case 'Conectados':
+                        servicio.push('WiFi');
+                        break;
+                    case 'Cocina equipada':
+                        servicio.push('Cocina');
+                        break;
+                    case 'Estacionamiento gratuito':
+                        servicio.push('Estacionamiento gratuito');
+                        break;
+                    case 'Piscinas':
+                        servicio.push('Piscina');
+                        break;
+                    case 'Jacuzzi':
+                        servicio.push('Jacuzzi');
+                        break;
+                    case 'Aire Acondicionado':
+                        servicio.push('Aire acondicionado');
+                        break;
+                    case 'Calefacción':
+                        servicio.push('Calefacción');
+                        break;
+                    case 'Lavadora':
+                        tipo.push('Lavadora');
+                        break;
+                    case 'Secadora':
+                        servicio.push('Secadora');
+                        break;
+                    case 'TV':
+                        servicio.push('TV');
+                        break;
+                    default:
+                        tipo = ['todos'];
+                    }
+                }else{
+                    const nombreCategoria = this.querySelector('.category-name').textContent.trim();
+                    switch (nombreCategoria) {
+                        case 'Casas':
+                            tipo = tipo.filter(t => t !== 'Casa');
+                            break;
+                        case 'Estudio':
+                            tipo = tipo.filter(t => t !== 'Estudio');
+                            break;
+                        case 'Apartamentos':
+                            tipo = tipo.filter(t => t !== 'Apartamento');
+                            break;
+                        case 'Conectados':
+                            servicio = servicio.filter(s => s !== 'WiFi');
+                            break;
+                        case 'Cocina equipada':
+                            servicio = servicio.filter(s => s !== 'Cocina');
+                            break;
+                        case 'Estacionamiento gratuito':
+                            servicio = servicio.filter(s => s !== 'Estacionamiento gratuito');
+                            break;
+                        case 'Piscinas':
+                            servicio = servicio.filter(s => s !== 'Piscina');
+                            break;
+                        case 'Jacuzzi':
+                            servicio = servicio.filter(s => s !== 'Jacuzzi');
+                            break;
+                        case 'Aire Acondicionado':
+                            servicio = servicio.filter(s => s !== 'Aire acondicionado');
+                            break;
+                        case 'Calefacción':
+                            servicio = servicio.filter(s => s !== 'Calefacción');
+                            break;
+                        case 'Lavadora':
+                            tipo = tipo.filter(t => t !== 'Lavadora');
+                            break;
+                        case 'Secadora':
+                            servicio = servicio.filter(s => s !== 'Secadora');
+                            break;
+                        case 'TV':
+                            servicio = servicio.filter(s => s !== 'TV');
+                            break;
+                    }
+                }
+                if (servicio.length == 0) {
+                    servicio.push("none");
+                }
+                if (tipo.length == 0) {
+                    tipo.push("todos");
+                }
+                mostrarAlojamientos(tipo, servicio);
+            });
+        });
     </script>
-    
-    <!-- Cargar session manager si existe -->
     <script src="/js/session-manager.js"></script>
 </body>
 </html>
