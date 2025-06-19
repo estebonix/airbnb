@@ -121,7 +121,7 @@ public class AlojamientoServices {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return createAlojamientoFromResultSet(rs);
+                return createAlojamientoFromResultSet(rs); 
             }
         } catch (Exception e) {
             e.printStackTrace();
