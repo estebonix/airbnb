@@ -338,7 +338,7 @@
                 return;
             }
             
-            alert('Reserva simulada:\\nAlojamiento: ' + alojamientoData.titulo + '\\nFechas: ' + checkinDate + ' a ' + checkoutDate + '\\nHuéspedes: ' + guests + '\\n\\nEsta funcionalidad estará disponible próximamente.');
+            alert('Reserva simulada:\nAlojamiento: ' + alojamientoData.titulo + '\nFechas: ' + checkinDate + ' a ' + checkoutDate + '\nHuéspedes: ' + guests + '\n\nEsta funcionalidad estará disponible próximamente.');
         }
 
         function changeMainImage(newSrc) {
@@ -353,7 +353,7 @@
         }
 
         function eliminarAlojamiento(id) {
-            if (!confirm('¿Estás seguro de que quieres eliminar este alojamiento?\\n\\nEsta acción no se puede deshacer.')) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este alojamiento?\n\nEsta acción no se puede deshacer.')) {
                 return;
             }
             
@@ -628,7 +628,7 @@
             }
 
             if (!isValid) {
-                alert('Errores en el formulario:\\n' + errors.join('\\n'));
+                alert('Errores en el formulario:\n' + errors.join('\n'));
             }
 
             return isValid;
@@ -675,7 +675,7 @@
             saveBtn.disabled = true;
             saveBtn.textContent = 'Guardando...';
 
-            fetch('/alojamiento/update/' + currentAlojamiento.id + '?emailPropietario=' + encodeURIComponent(userEmail), {
+            fetch('/alojamiento/update/' + currentAlojamiento.id + '?emailPropietario=' + userEmail, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

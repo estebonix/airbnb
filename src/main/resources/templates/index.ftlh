@@ -99,11 +99,11 @@
                         <i class="fas fa-chart-bar"></i>
                         Estadísticas
                     </button>
-                    <button class="export-btn" onclick="exportSearchResults()" title="Exportar resultados">
+                    <button class="export-btn" title="Exportar resultados">
                         <i class="fas fa-download"></i>
                         Exportar
                     </button>
-                    <button class="share-btn" onclick="shareSearch()" title="Compartir búsqueda">
+                    <button class="share-btn" title="Compartir búsqueda">
                         <i class="fas fa-share"></i>
                         Compartir
                     </button>
@@ -1125,111 +1125,6 @@
                 event.preventDefault();
                 clearAllFilters();
             }
-        }
-
-        // Funciones para exportar y compartir
-        function exportSearchResults() {
-            if (filteredAlojamientos.length === 0) {
-                showNotification('⚠️ No hay resultados para exportar', 'error');
-                return;
-            }
-            
-            try {
-                var csvContent = generateCSV(filteredAlojamientos);
-                var today = new Date();
-                var dateStr = today.getFullYear() + '-' + 
-                             String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-                             String(today.getDate()).padStart(2, '0');
-                downloadCSV(csvContent, 'alojamientos_' + dateStr + '.csv');
-                showNotification('📥 ' + filteredAlojamientos.length + ' alojamientos exportados', 'success');
-            } catch (error) {
-                console.error('Error al exportar:', error);
-                showNotification('❌ Error al exportar resultados', 'error');
-            }
-        }
-
-        function generateCSV(alojamientos) {
-            var headers = [
-                'ID', 'Título', 'Tipo', 'Ciudad', 'País', 'Precio/Noche (€)', 
-                'Capacidad', 'Habitaciones', 'Camas', 'Baños', 'Descripción'
-            ];
-            
-            var rows = alojamientos.map(function(alojamiento) {
-                return [
-                    alojamiento.id,
-                    '"' + alojamiento.titulo.replace(/"/g, '""') + '"',
-                    alojamiento.tipoAlojamiento,
-                    alojamiento.ciudad,
-                    alojamiento.pais,
-                    alojamiento.precioNoche,
-                    alojamiento.capacidad,
-                    alojamiento.habitaciones,
-                    alojamiento.camas,
-                    alojamiento.banos,
-                    '"' + alojamiento.descripcion.replace(/"/g, '""').substring(0, 100) + '..."'
-                ];
-            });
-            
-            return [headers.join(',')].concat(rows.map(function(row) {
-                return row.join(',');
-            })).join('\n');
-        }
-
-        function downloadCSV(content, filename) {
-            var blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' });
-            var link = document.createElement('a');
-            
-            if (link.download !== undefined) {
-                var url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', filename);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            }
-        }
-
-        function shareSearch() {
-            var url = new URL(window.location.href);
-            url.search = ''; // Limpiar parámetros existentes
-            
-            // Agregar parámetros de filtros activos
-            if (currentFilters.searchText) url.searchParams.set('search', currentFilters.searchText);
-            if (currentFilters.location) url.searchParams.set('location', currentFilters.location);
-            if (currentFilters.minPrice) url.searchParams.set('minPrice', currentFilters.minPrice);
-            if (currentFilters.maxPrice) url.searchParams.set('maxPrice', currentFilters.maxPrice);
-            if (currentFilters.capacity) url.searchParams.set('capacity', currentFilters.capacity);
-            if (currentFilters.rooms) url.searchParams.set('rooms', currentFilters.rooms);
-            if (currentFilters.type) url.searchParams.set('type', currentFilters.type);
-            
-            // Copiar al portapapeles
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url.toString()).then(function() {
-                    showNotification('🔗 Enlace de búsqueda copiado al portapapeles', 'success');
-                }).catch(function() {
-                    fallbackCopyTextToClipboard(url.toString());
-                });
-            } else {
-                fallbackCopyTextToClipboard(url.toString());
-            }
-        }
-
-        function fallbackCopyTextToClipboard(text) {
-            var textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.opacity = '0';
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                showNotification('🔗 Enlace copiado', 'success');
-            } catch (err) {
-                showNotification('❌ No se pudo copiar el enlace', 'error');
-            }
-            document.body.removeChild(textArea);
         }
 
         function showSearchStats() {

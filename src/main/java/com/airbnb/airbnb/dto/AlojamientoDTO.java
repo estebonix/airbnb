@@ -2,6 +2,9 @@ package com.airbnb.airbnb.dto;
 
 import java.sql.Date;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class AlojamientoDTO {
 
     private Long id;
@@ -19,14 +22,31 @@ public class AlojamientoDTO {
     private String pais;
     private String codigoPostal;
     private Date fechaRegistro;
-    private UsuarioDTO propietario; // Objeto completo del propietario
+    private UsuarioDTO propietario;
+
+    // Constructor por defecto (necesario para Jackson)
+    public AlojamientoDTO() {
+    }
 
     // Constructor principal con UsuarioDTO completo
-    public AlojamientoDTO(Long id, String titulo, String descripcion, String tipoAlojamiento,
-            Integer capacidad, Integer habitaciones, Integer camas, Integer banos,
-            Double precioNoche, String direccion, String direccionDescripcion,
-            String ciudad, String pais, String codigoPostal, Date fechaRegistro,
-            UsuarioDTO propietario) {
+    @JsonCreator
+    public AlojamientoDTO(
+            @JsonProperty("id") Long id,
+            @JsonProperty("titulo") String titulo,
+            @JsonProperty("descripcion") String descripcion,
+            @JsonProperty("tipoAlojamiento") String tipoAlojamiento,
+            @JsonProperty("capacidad") Integer capacidad,
+            @JsonProperty("habitaciones") Integer habitaciones,
+            @JsonProperty("camas") Integer camas,
+            @JsonProperty("banos") Integer banos,
+            @JsonProperty("precioNoche") Double precioNoche,
+            @JsonProperty("direccion") String direccion,
+            @JsonProperty("direccionDescripcion") String direccionDescripcion,
+            @JsonProperty("ciudad") String ciudad,
+            @JsonProperty("pais") String pais,
+            @JsonProperty("codigoPostal") String codigoPostal,
+            @JsonProperty("fechaRegistro") Date fechaRegistro,
+            @JsonProperty("propietario") UsuarioDTO propietario) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;

@@ -2,6 +2,9 @@ package com.airbnb.airbnb.dto;
 
 import java.sql.Date;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class UsuarioDTO {
     private Long id;
     private String nombre;
@@ -13,8 +16,21 @@ public class UsuarioDTO {
     private String biografia;
     private String fecha_registro;
 
-    public UsuarioDTO(Long id, String nombre, String apellido, String email, String contraseña, Date fechaNacimiento,
-            String telefono, String biografia, String fecha_registro) {
+    // Constructor por defecto (necesario para Jackson)
+    public UsuarioDTO() {
+    }
+
+    @JsonCreator
+    public UsuarioDTO(
+            @JsonProperty("id") Long id,
+            @JsonProperty("nombre") String nombre,
+            @JsonProperty("apellido") String apellido,
+            @JsonProperty("email") String email,
+            @JsonProperty("contraseña") String contraseña,
+            @JsonProperty("fechaNacimiento") Date fechaNacimiento,
+            @JsonProperty("telefono") String telefono,
+            @JsonProperty("biografia") String biografia,
+            @JsonProperty("fecha_registro") String fecha_registro) {
         this.id = id;
         this.nombre = nombre;
         this.apellido = apellido;
